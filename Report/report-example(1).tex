@@ -1,0 +1,38 @@
+\documentclass{ds-report}
+
+\assignment{Remote communication} % Set to `Remote communication` or `Project`.
+\authorOne{Martijn Leplae} % Name of first team partner.
+\studentnumberOne{r0737706} % Student number of first team partner.
+\authorTwo{Andreas Hinderyckx} % Name of second team partner.
+\studentnumberTwo{r0760777}  % Student number of second team partner.
+
+\begin{document}
+	\maketitle
+
+	\paragraph{Question 1} 
+	\textbf{Stub}:
+	The stub is representative of the remote object one is communicating with. It's ought to create a black box from the communication with the remote entity. As such, it acts as a gateway for the client to send outgoing requests to the server side (remote entity). To achieve this, the stub applies marshalling to the requests of the client.
+	
+	\textbf{Skeleton}: the skeleton is similars to the stub, but it's situated at the server side (remote side). All client requests are made on the skeleton: as such it unmarhalls these incoming requests and calls the corresponding methods on the server-side objects.
+	
+
+	\paragraph{Question 2} 
+	The skeleton at the server side implements the Java \texttt{Remote} interface as its methods may be invoked by non local clients. On the other hand, the plain old Java objects (POJOs) at the server side which should be able to received by the client implement the \texttt{serializable} interface as they should be marshalled when sent to the client side. 
+	
+	\paragraph{Question 3} The java \texttt{rmiregistry} (RMI registry) is a central unit which advertises the methods and objects available at the server side which can be used by the clients. Firstly, a server side component registers its services with the registry. Afterwards, a client can look up these services. Finally, the client can directly call methods on these looked up objects for example.
+	
+	There is no need for a registry service in other remote communication technologies as the clients are ought to know the services provided by the server side. In SOAP for example, the services could be advertised on a web page or its WSDL. Based on this information, the client can compose its XML-request.
+	
+	\paragraph{Question 4} The WSDL file provides extra information with regards to the binding style, the transport protocol being used, the XML encoding used, etc. 
+	
+	The used SOAP binding style is of type \texttt{Document}, which means that --- in contrast to RPC Style --- there's no type information and in general no SOAP formatting rules. The transport configuration specifies the transport layer protocol being used. In this case, HTTP is used. 
+	
+	\paragraph{Question 5} The main advantage of the hypermedia-driven approach is that the structure of the server URL's may be modified without breaking existing code. This is because each response includes hyperlinks to other server endpoints which can be used to discover the server side API. The coupling is reduced based on this reasoning. Future upgrades can be discovered more efficiently by developers, as the reflection of this hypermedia-driven approach always provides links to related conepts in its responses.
+%	The coupling is reduced based on this reasoning, as well as the fact that hard coded links, for example, are no longer prone to breaking when server modifications are made. 
+	
+	
+	\clearpage
+	
+	% You can include diagrams here.
+	
+\end{document}
