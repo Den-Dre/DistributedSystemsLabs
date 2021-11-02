@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/SOAP-project/SpringSOAP.iml" filepath="$PROJECT_DIR$/SOAP-project/SpringSOAP.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ex-2.iml" filepath="$PROJECT_DIR$/.idea/ex-2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/REST-project/food-rest-service.iml" filepath="$PROJECT_DIR$/REST-project/food-rest-service.iml" />
+    </modules>
+  </component>
+</project>

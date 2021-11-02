@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "org.example.AlmaOnline.server";
+option java_outer_classname = "AlmaOnlineProto";
+option objc_class_prefix = "AO";
+
+package almaonline;
+
+service AlmaOnline {
+  rpc getRestaurants (RestaurantsRequest) returns (RestaurantsReply) {}
+  rpc getMenu (MenuRequest) returns (MenuReply) {}
+}
+
+message RestaurantsReply {
+  repeated RestaurantMessage info = 1;
+}
+
+message RestaurantMessage {
+  string name = 1;
+  string id = 2;
+}
+
+message RestaurantsRequest {
+}
+
+message MenuRequest {
+  string id = 1;
+}
+
+message MenuReply {
+  repeated ItemMessage item = 1;
+}
+
+message ItemMessage {
+  string name = 1;
+  double price = 2;
+}

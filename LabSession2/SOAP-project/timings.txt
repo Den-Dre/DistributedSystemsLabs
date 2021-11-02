@@ -1,0 +1,39 @@
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,138393
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,011582
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+
+ time: 0,010619
+tienen$ 
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,009166
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,004557
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,010012
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,010478
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,009152
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,008767
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,007879
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,007728
+tienen$ curl --header "content-type: text/xml" -d @requestorder.xml http://torhout.cs.kotnet.kuleuven.be:8080/ws -w "\n time: %{time_total}\n"
+
+ time: 0,010506
+
