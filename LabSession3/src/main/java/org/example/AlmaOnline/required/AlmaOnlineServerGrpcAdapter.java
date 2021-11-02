@@ -13,6 +13,7 @@ import org.example.AlmaOnline.server.*;
 import org.example.AlmaOnline.provided.service.exceptions.OrderException;
 
 import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -37,9 +38,6 @@ public class AlmaOnlineServerGrpcAdapter extends AlmaOnlineGrpc.AlmaOnlineImplBa
         //super.getRestaurants(request, responseObserver);
         List<Restaurant> list = new ArrayList<>(service.getRestaurants());
         RestaurantsReply.Builder builder = RestaurantsReply.newBuilder();
-//        list.stream().forEach(restaurant -> builder.addInfo(list.indexOf(restaurant),
-//                org.example.AlmaOnline.server.Restaurant.newBuilder().setId(restaurant.getId()).setName(restaurant.getName())).build()
-//        );
 
         IntStream.range(0, list.size()).
                 forEach(i -> builder.addInfo(i,
@@ -73,4 +71,25 @@ public class AlmaOnlineServerGrpcAdapter extends AlmaOnlineGrpc.AlmaOnlineImplBa
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void addDineInOrder(DineInOrderRequest request, StreamObserver<DineInOrderReply> responseObserver) {
+        try {
+            service.createDineInOrder(
+                    request.getRestaurantId(),
+                    new DineInOrderQuote(
+                        request.getOrderId(),
+                        new Date((long) request.getReservationDate()),
+                        request.getCustomer(),
+                        request.getItemsList(),
+                        new Date((long) request.getReservationDate())
+                    )
+            );
+        } catch (OrderException e) {
+            System.out.println("Order-exception!!");
+        }
+
+        DineInOrderReply reply = DineInOrderReply.newBuilder().build();
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+    }
 }

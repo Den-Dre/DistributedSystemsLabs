@@ -44,6 +44,16 @@ public final class AlmaOnlineProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_almaonline_ItemMessage_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_almaonline_DineInOrderRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_almaonline_DineInOrderRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_almaonline_DineInOrderReply_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_almaonline_DineInOrderReply_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -61,12 +71,18 @@ public final class AlmaOnlineProto {
       "\013MenuRequest\022\n\n\002id\030\001 \001(\t\"2\n\tMenuReply\022%\n" +
       "\004item\030\001 \003(\0132\027.almaonline.ItemMessage\"*\n\013" +
       "ItemMessage\022\014\n\004name\030\001 \001(\t\022\r\n\005price\030\002 \001(\001" +
-      "2\233\001\n\nAlmaOnline\022P\n\016getRestaurants\022\036.alma" +
-      "online.RestaurantsRequest\032\034.almaonline.R" +
-      "estaurantsReply\"\000\022;\n\007getMenu\022\027.almaonlin" +
-      "e.MenuRequest\032\025.almaonline.MenuReply\"\000B7" +
-      "\n\035org.example.AlmaOnline.serverB\017AlmaOnl" +
-      "ineProtoP\001\242\002\002AOb\006proto3"
+      "\"u\n\022DineInOrderRequest\022\024\n\014restaurantId\030\001" +
+      " \001(\t\022\017\n\007orderId\030\002 \001(\t\022\020\n\010customer\030\003 \001(\t\022" +
+      "\r\n\005items\030\004 \003(\t\022\027\n\017reservationDate\030\005 \001(\001\"" +
+      "\022\n\020DineInOrderReply2\355\001\n\nAlmaOnline\022P\n\016ge" +
+      "tRestaurants\022\036.almaonline.RestaurantsReq" +
+      "uest\032\034.almaonline.RestaurantsReply\"\000\022;\n\007" +
+      "getMenu\022\027.almaonline.MenuRequest\032\025.almao" +
+      "nline.MenuReply\"\000\022P\n\016addDineInOrder\022\036.al" +
+      "maonline.DineInOrderRequest\032\034.almaonline" +
+      ".DineInOrderReply\"\000B7\n\035org.example.AlmaO" +
+      "nline.serverB\017AlmaOnlineProtoP\001\242\002\002AOb\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -109,6 +125,18 @@ public final class AlmaOnlineProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_almaonline_ItemMessage_descriptor,
         new java.lang.String[] { "Name", "Price", });
+    internal_static_almaonline_DineInOrderRequest_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_almaonline_DineInOrderRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_almaonline_DineInOrderRequest_descriptor,
+        new java.lang.String[] { "RestaurantId", "OrderId", "Customer", "Items", "ReservationDate", });
+    internal_static_almaonline_DineInOrderReply_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_almaonline_DineInOrderReply_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_almaonline_DineInOrderReply_descriptor,
+        new java.lang.String[] { });
     com.google.protobuf.TimestampProto.getDescriptor();
   }
 

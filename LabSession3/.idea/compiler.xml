@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="AlmaOnline" />
         <module name="ex-3" />
+        <module name="LabSession3" />
       </profile>
     </annotationProcessing>
   </component>

@@ -76,6 +76,37 @@ public final class AlmaOnlineGrpc {
     return getGetMenuMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.example.AlmaOnline.server.DineInOrderRequest,
+      org.example.AlmaOnline.server.DineInOrderReply> getAddDineInOrderMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "addDineInOrder",
+      requestType = org.example.AlmaOnline.server.DineInOrderRequest.class,
+      responseType = org.example.AlmaOnline.server.DineInOrderReply.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.example.AlmaOnline.server.DineInOrderRequest,
+      org.example.AlmaOnline.server.DineInOrderReply> getAddDineInOrderMethod() {
+    io.grpc.MethodDescriptor<org.example.AlmaOnline.server.DineInOrderRequest, org.example.AlmaOnline.server.DineInOrderReply> getAddDineInOrderMethod;
+    if ((getAddDineInOrderMethod = AlmaOnlineGrpc.getAddDineInOrderMethod) == null) {
+      synchronized (AlmaOnlineGrpc.class) {
+        if ((getAddDineInOrderMethod = AlmaOnlineGrpc.getAddDineInOrderMethod) == null) {
+          AlmaOnlineGrpc.getAddDineInOrderMethod = getAddDineInOrderMethod =
+              io.grpc.MethodDescriptor.<org.example.AlmaOnline.server.DineInOrderRequest, org.example.AlmaOnline.server.DineInOrderReply>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "addDineInOrder"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.AlmaOnline.server.DineInOrderRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.example.AlmaOnline.server.DineInOrderReply.getDefaultInstance()))
+              .setSchemaDescriptor(new AlmaOnlineMethodDescriptorSupplier("addDineInOrder"))
+              .build();
+        }
+      }
+    }
+    return getAddDineInOrderMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -138,6 +169,13 @@ public final class AlmaOnlineGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetMenuMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void addDineInOrder(org.example.AlmaOnline.server.DineInOrderRequest request,
+        io.grpc.stub.StreamObserver<org.example.AlmaOnline.server.DineInOrderReply> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddDineInOrderMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -154,6 +192,13 @@ public final class AlmaOnlineGrpc {
                 org.example.AlmaOnline.server.MenuRequest,
                 org.example.AlmaOnline.server.MenuReply>(
                   this, METHODID_GET_MENU)))
+          .addMethod(
+            getAddDineInOrderMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.example.AlmaOnline.server.DineInOrderRequest,
+                org.example.AlmaOnline.server.DineInOrderReply>(
+                  this, METHODID_ADD_DINE_IN_ORDER)))
           .build();
     }
   }
@@ -187,6 +232,14 @@ public final class AlmaOnlineGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetMenuMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void addDineInOrder(org.example.AlmaOnline.server.DineInOrderRequest request,
+        io.grpc.stub.StreamObserver<org.example.AlmaOnline.server.DineInOrderReply> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAddDineInOrderMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -215,6 +268,13 @@ public final class AlmaOnlineGrpc {
     public org.example.AlmaOnline.server.MenuReply getMenu(org.example.AlmaOnline.server.MenuRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetMenuMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.example.AlmaOnline.server.DineInOrderReply addDineInOrder(org.example.AlmaOnline.server.DineInOrderRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAddDineInOrderMethod(), getCallOptions(), request);
     }
   }
 
@@ -247,10 +307,19 @@ public final class AlmaOnlineGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetMenuMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.example.AlmaOnline.server.DineInOrderReply> addDineInOrder(
+        org.example.AlmaOnline.server.DineInOrderRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAddDineInOrderMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_RESTAURANTS = 0;
   private static final int METHODID_GET_MENU = 1;
+  private static final int METHODID_ADD_DINE_IN_ORDER = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -276,6 +345,10 @@ public final class AlmaOnlineGrpc {
         case METHODID_GET_MENU:
           serviceImpl.getMenu((org.example.AlmaOnline.server.MenuRequest) request,
               (io.grpc.stub.StreamObserver<org.example.AlmaOnline.server.MenuReply>) responseObserver);
+          break;
+        case METHODID_ADD_DINE_IN_ORDER:
+          serviceImpl.addDineInOrder((org.example.AlmaOnline.server.DineInOrderRequest) request,
+              (io.grpc.stub.StreamObserver<org.example.AlmaOnline.server.DineInOrderReply>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -340,6 +413,7 @@ public final class AlmaOnlineGrpc {
               .setSchemaDescriptor(new AlmaOnlineFileDescriptorSupplier())
               .addMethod(getGetRestaurantsMethod())
               .addMethod(getGetMenuMethod())
+              .addMethod(getAddDineInOrderMethod())
               .build();
         }
       }

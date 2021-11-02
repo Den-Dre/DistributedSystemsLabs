@@ -6,6 +6,7 @@ import org.example.AlmaOnline.server.*;
 
 import java.lang.reflect.MalformedParameterizedTypeException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,7 +36,16 @@ public class AlmaOnlineClientGrpcAdapter implements AlmaOnlineClientAdapter {
     // createDineInOrder should create the given dine-in order at the AlmaOnline server
     @Override
     public ListenableFuture<?> createDineInOrder(AlmaOnlineGrpc.AlmaOnlineFutureStub stub, DineInOrderQuote order) {
-        return null;
+        DineInOrderRequest.Builder builder = DineInOrderRequest.newBuilder();
+        builder.setRestaurantId(order.getRestaurantId());
+        builder.setOrderId(order.getOrderId());
+        builder.setCustomer(order.getCustomer());
+        builder.addAllItems(order.getItems());
+        builder.setReservationDate(order.getReservationDate().getTime());
+
+        DineInOrderRequest request = builder.build();
+
+        return stub.addDineInOrder(request);
     }
 
     // createDeliveryOrder should create the given delivery order at the AlmaOnline server

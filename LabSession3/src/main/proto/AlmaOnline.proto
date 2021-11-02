@@ -12,6 +12,7 @@ package almaonline;
 service AlmaOnline {
   rpc getRestaurants (RestaurantsRequest) returns (RestaurantsReply) {}
   rpc getMenu (MenuRequest) returns (MenuReply) {}
+  rpc addDineInOrder(DineInOrderRequest) returns (DineInOrderReply) {}
 }
 
 message RestaurantsReply {
@@ -38,3 +39,15 @@ message ItemMessage {
   string name = 1;
   double price = 2;
 }
+
+message DineInOrderRequest {
+  string restaurantId = 1;
+  string orderId = 2;
+  string customer = 3;
+  repeated string items = 4;
+  double reservationDate = 5;
+}
+
+message DineInOrderReply {
+}
+
