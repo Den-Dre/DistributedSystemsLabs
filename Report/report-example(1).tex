@@ -29,10 +29,54 @@
 	
 	\paragraph{Question 5} The main advantage of the hypermedia-driven approach is that the structure of the server URL's may be modified without breaking existing code. This is because each response includes hyperlinks to other server endpoints which can be used to discover the server side API. The coupling is reduced based on this reasoning. Future upgrades can be discovered more efficiently by developers, as the reflection of this hypermedia-driven approach always provides links to related conepts in its responses.
 %	The coupling is reduced based on this reasoning, as well as the fact that hard coded links, for example, are no longer prone to breaking when server modifications are made. 
+
+	\paragraph{Question 6}
+	Commonalities:
+	\begin{itemize}
+		\item Both of them offer an interface of the available methods.
+		
+	\end{itemize}
+	Differences:
+	\begin{itemize}
+		\item Java RMI has support for remote object references (as specified in its RMI interface), whose methods can be invoked, whereas gRPC only supports the remote invocation of the methods specified in its \texttt{.proto} file.
+		\item The \texttt{.proto} file is used to automatically generate the required classes, whereas the RMI interface is simply a facade to map the client requests onto the corresponding methods.
+	\end{itemize}
+
+	\paragraph{Question 7}
+	The advantage of gRPC's code generation is that the associated \texttt{.proto} file is written in the proto3 language. It's universally usable with different underlying languages, whereas de Java RMI interface is only usable with the Java language.
+	The disadvantages of code generation in general are:
+	\begin{itemize}
+		\item There must exist support for code generation of the language that you're using.
+		\item One must recompile the project eacht time a change is made in the interface, for example each time the \texttt{.proto} file is modified.
+		\item The code is automatically generated, therefore the programmer has initially no notion of its strucutre, which can make it harder to debug possible errors.
+	\end{itemize}
+
+	\paragraph{Question 8}
+	The advantages of the binary format are:
+	\begin{itemize}
+		\item The can be serialized more quickly thanks to the binary format,
+		\item The binary payload only uses a small amount of bandwidth, which makes it also suitable limited bandwidth scenarios.
+		\item The 
+	\end{itemize}
+	The disadvantages are:
+	\begin{itemize}
+		\item The binary format is not human-readable, whereas JSON files are,
+		\item gRPC doesn't have browser support, whereas SOAP and REST do as they're based on the text based HTTP 1.1 protocol.
+	\end{itemize}
 	
+	\paragraph{Question 9}
+	The WSDL interface is based on XML whereas the gRPC interface is based on the proto3 language. The former is much more verbose, which also makes it less readable for the implementor. The WSDL language specifies services in terms of ports, whereas there's no notion of ports in the \texttt{.proto} file. 
 	
+	Personally, we find the \texttt{.proto} file learning curve to be steeper, although it does offer a more concise way of specifying the interface. The WSDL file is very verbose and unclear to read in our opinion, which makes the \texttt{.proto} file more appealing.
+	
+	\paragraph{Question 10}
+	\begin{enumerate}
+		\item[(a)] One shouldn't use Java RMI as it only supports Java applications, which isn't suitable for this use case where all applications should be able to use the API, independent of their underlying language. REST, SOAP and gRPC can all be used for this use case. Advantages of REST are that it's widely used and supports readable JSON-type responses and HTTP requests. On the other hand: gRPC can be implemented really efficiently due to it's support for the binary format.
+		\item[(b)] As mentioned above, for high performance scanrios one should use gRPC as it's built on the highly efficient binary format. Futhermore, gRPC's interface (\texttt{.proto} file) can be used with any language, which makes it an excellent option for this use case as there are various programming languages being used.
+		\item[(c)] SOAP, REST, gRPC and Java RMI could be used for this scenario. The disadvantage of choosing for Java RMI is that the company can't add additional applications or services which aren't written in Java, neither can it expand its infrastrucutre later on to non-Java applications or services. The other options do support this extensibility, with their own advantages and disadvantages as mentioned above.
+	\end{enumerate}
 	\clearpage
-	
+
 	% You can include diagrams here.
 	
 \end{document}
