@@ -23,9 +23,9 @@
 	
 	There is no need for a registry service in other remote communication technologies as the clients are ought to know the services provided by the server side. In SOAP for example, the services could be advertised on a web page or its WSDL. Based on this information, the client can compose its XML-request.
 	
-	\paragraph{Question 4} The WSDL file provides extra information with regards to the binding style, the transport protocol being used, the XML encoding used, etc. 
+	\paragraph{Question 4} The WSDL file provides extra information with regards to the binding style, the transport protocol being used, the XML encoding used, etc. More specifically, operations that can be invoked by the client are specified in the `bindings' section of the WSDL file. Herein, every message corresponds to an operation and the message's parts their actual meaning are defined by the corresponding binding.
 	
-	The used SOAP binding style is of type \texttt{Document}, which means that --- in contrast to RPC Style --- there's no type information and in general no SOAP formatting rules. The transport configuration specifies the transport layer protocol being used. In this case, HTTP is used. 
+	The used SOAP binding style is of type \texttt{Document}, which means that --- in contrast to RPC Style --- there's no type information and in general no SOAP formatting rules. The transport configuration specifies the transport layer protocol being used: in this case HTTP is used. 
 	
 	\paragraph{Question 5} The main advantage of the hypermedia-driven approach is that the structure of the server URL's may be modified without breaking existing code. This is because each response includes hyperlinks to other server endpoints which can be used to discover the server side API. The coupling is reduced based on this reasoning. Future upgrades can be discovered more efficiently by developers, as the reflection of this hypermedia-driven approach always provides links to related conepts in its responses.
 %	The coupling is reduced based on this reasoning, as well as the fact that hard coded links, for example, are no longer prone to breaking when server modifications are made. 
@@ -40,6 +40,7 @@
 	\begin{itemize}
 		\item Java RMI has support for remote object references (as specified in its RMI interface), whose methods can be invoked, whereas gRPC only supports the remote invocation of the methods specified in its \texttt{.proto} file.
 		\item The \texttt{.proto} file is used to automatically generate the required classes, whereas the RMI interface is simply a facade to map the client requests onto the corresponding methods.
+		\item In order to connect to a Java RMI interface, the server must first register its services with the name service and the client must connect to this name service to call the registered services. With gRPC, there's no notion of a name server.
 	\end{itemize}
 
 	\paragraph{Question 7}
@@ -48,7 +49,7 @@
 	\begin{itemize}
 		\item There must exist support for code generation of the language that you're using.
 		\item One must recompile the project eacht time a change is made in the interface, for example each time the \texttt{.proto} file is modified.
-		\item The code is automatically generated, therefore the programmer has initially no notion of its strucutre, which can make it harder to debug possible errors.
+		\item The code is automatically generated, therefore the programmer has initially no notion of its strucutre, which can make it harder to debug possible errors. Therefore, coupling with generated code must be kept low.
 	\end{itemize}
 
 	\paragraph{Question 8}
@@ -56,7 +57,6 @@
 	\begin{itemize}
 		\item The can be serialized more quickly thanks to the binary format,
 		\item The binary payload only uses a small amount of bandwidth, which makes it also suitable limited bandwidth scenarios.
-		\item The 
 	\end{itemize}
 	The disadvantages are:
 	\begin{itemize}
@@ -65,7 +65,7 @@
 	\end{itemize}
 	
 	\paragraph{Question 9}
-	The WSDL interface is based on XML whereas the gRPC interface is based on the proto3 language. The former is much more verbose, which also makes it less readable for the implementor. The WSDL language specifies services in terms of ports, whereas there's no notion of ports in the \texttt{.proto} file. 
+	The WSDL interface is based on XML whereas the gRPC interface is based on the proto3 language. The former is much more verbose, which makes it less readable for the implementor and is slower to consume for JavaScript-based browsers. The WSDL language specifies services in terms of ports, whereas there's no notion of ports in the \texttt{.proto} file. 
 	
 	Personally, we find the \texttt{.proto} file learning curve to be steeper, although it does offer a more concise way of specifying the interface. The WSDL file is very verbose and unclear to read in our opinion, which makes the \texttt{.proto} file more appealing.
 	

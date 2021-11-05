@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.3.14)  4 NOV 2021 13:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.3.14)  5 NOV 2021 10:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -235,13 +235,13 @@ Package microtype Info: Loading generic protrusion settings for font family
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] (./report-example(
 1).aux) ) 
 Here is how much of TeX's memory you used:
- 4408 strings out of 481239
- 70778 string characters out of 5920377
+ 4412 strings out of 481239
+ 70820 string characters out of 5920377
  354973 words of memory out of 5000000
  19576 multiletter control sequences out of 15000+600000
- 539719 words of font info for 58 fonts, out of 8000000 for 9000
+ 539835 words of font info for 60 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 41i,5n,46p,568b,236s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,5n,46p,568b,235s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}{/usr/shar
 e/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texmf/fonts/type1/
 public/cm-super/sfbx1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc
@@ -250,7 +250,7 @@ public/cm-super/sfbx1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc
 ublic/cm-super/sfrm2488.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1
 200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti2488.pfb></usr/share/
 texmf/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on report-example(1).pdf (3 pages, 147610 bytes).
+Output written on report-example(1).pdf (3 pages, 148437 bytes).
 PDF statistics:
  50 PDF objects out of 1000 (max. 8388607)
  36 compressed objects within 1 object stream
