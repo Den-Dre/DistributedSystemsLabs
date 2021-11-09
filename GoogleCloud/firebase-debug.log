@@ -1,58 +1,58 @@
-[debug] [2021-11-09T16:40:01.891Z] ----------------------------------------------------------------------
-[debug] [2021-11-09T16:40:01.893Z] Command:       /usr/local/bin/firebase /home/martijn/.cache/firebase/tools/lib/node_modules/firebase-tools/lib/bin/firebase emulators:start --project demo-distributed-systems-kul
-[debug] [2021-11-09T16:40:01.894Z] CLI Version:   9.20.0
-[debug] [2021-11-09T16:40:01.894Z] Platform:      linux
-[debug] [2021-11-09T16:40:01.894Z] Node Version:  v12.18.1
-[debug] [2021-11-09T16:40:01.896Z] Time:          Tue Nov 09 2021 17:40:01 GMT+0100 (Central European Standard Time)
-[debug] [2021-11-09T16:40:01.897Z] ----------------------------------------------------------------------
+[debug] [2021-11-09T20:31:26.980Z] ----------------------------------------------------------------------
+[debug] [2021-11-09T20:31:26.982Z] Command:       /usr/local/bin/firebase /home/martijn/.cache/firebase/tools/lib/node_modules/firebase-tools/lib/bin/firebase emulators:start --project demo-distributed-systems-kul
+[debug] [2021-11-09T20:31:26.982Z] CLI Version:   9.20.0
+[debug] [2021-11-09T20:31:26.982Z] Platform:      linux
+[debug] [2021-11-09T20:31:26.982Z] Node Version:  v12.18.1
+[debug] [2021-11-09T20:31:26.985Z] Time:          Tue Nov 09 2021 21:31:26 GMT+0100 (Central European Standard Time)
+[debug] [2021-11-09T20:31:26.986Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2021-11-09T16:40:01.943Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2021-11-09T16:40:01.943Z] > authorizing via signed-in user (martijnleplae@hotmail.be)
+[debug] [2021-11-09T20:31:27.037Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2021-11-09T20:31:27.037Z] > authorizing via signed-in user (martijnleplae@hotmail.be)
 [info] i  emulators: Starting emulators: auth, firestore, pubsub {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, pubsub"}}
 [info] i  emulators: Detected demo project ID "demo-distributed-systems-kul", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail. {"metadata":{"emulator":{"name":"hub"},"message":"Detected demo project ID \"demo-distributed-systems-kul\", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail."}}
-[debug] [2021-11-09T16:40:01.960Z] [hub] writing locator at /tmp/hub-demo-distributed-systems-kul.json
+[debug] [2021-11-09T20:31:27.055Z] [hub] writing locator at /tmp/hub-demo-distributed-systems-kul.json
 [warn] ⚠  firestore: Did not find a Cloud Firestore rules file specified in a firebase.json config file. {"metadata":{"emulator":{"name":"firestore"},"message":"Did not find a Cloud Firestore rules file specified in a firebase.json config file."}}
 [warn] ⚠  firestore: The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration. {"metadata":{"emulator":{"name":"firestore"},"message":"The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration."}}
-[debug] [2021-11-09T16:40:01.975Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: projectId"}}
-[debug] [2021-11-09T16:40:01.976Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2021-11-09T16:40:01.976Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/martijn/.cache/firebase/emulators/cloud-firestore-emulator-v1.13.1.jar","--host","localhost","--port",8084],"optionalArgs":["port","webchannel_port","host","rules","functions_emulator","seed_from_export"],"joinArgs":false} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/martijn/.cache/firebase/emulators/cloud-firestore-emulator-v1.13.1.jar\",\"--host\",\"localhost\",\"--port\",8084],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"functions_emulator\",\"seed_from_export\"],\"joinArgs\":false}"}}
+[debug] [2021-11-09T20:31:27.075Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: projectId"}}
+[debug] [2021-11-09T20:31:27.075Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2021-11-09T20:31:27.076Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/martijn/.cache/firebase/emulators/cloud-firestore-emulator-v1.13.1.jar","--host","localhost","--port",8084],"optionalArgs":["port","webchannel_port","host","rules","functions_emulator","seed_from_export"],"joinArgs":false} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/martijn/.cache/firebase/emulators/cloud-firestore-emulator-v1.13.1.jar\",\"--host\",\"localhost\",\"--port\",8084],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"functions_emulator\",\"seed_from_export\"],\"joinArgs\":false}"}}
 [info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
-[debug] [2021-11-09T16:40:02.948Z] Nov 09, 2021 5:40:02 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
-INFO: Started WebSocket server on ws://localhost:37197
- {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 5:40:02 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://localhost:37197\n"}}
-[debug] [2021-11-09T16:40:02.994Z] API endpoint: http://localhost: {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://localhost:"}}
-[debug] [2021-11-09T16:40:02.994Z] 8084
+[debug] [2021-11-09T20:31:28.579Z] Nov 09, 2021 9:31:28 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+INFO: Started WebSocket server on ws://localhost:45473
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:31:28 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://localhost:45473\n"}}
+[debug] [2021-11-09T20:31:28.628Z] API endpoint: http:// {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://"}}
+[debug] [2021-11-09T20:31:28.628Z] localhost:8084
 If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
 
    export FIRESTORE_EMULATOR_HOST=localhost:8084
 
 Dev App Server is now running.
 
- {"metadata":{"emulator":{"name":"firestore"},"message":"8084\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=localhost:8084\n\nDev App Server is now running.\n\n"}}
-[debug] [2021-11-09T16:40:05.634Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"pubsub"},"message":"Ignoring unsupported arg: projectId"}}
-[debug] [2021-11-09T16:40:05.634Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"pubsub"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2021-11-09T16:40:05.634Z] Starting Pub/Sub Emulator with command {"binary":"/home/martijn/.cache/firebase/emulators/pubsub-emulator-0.1.0/pubsub-emulator/bin/cloud-pubsub-emulator","args":["--host=localhost","--port=8083"],"optionalArgs":["port","host"],"joinArgs":true} {"metadata":{"emulator":{"name":"pubsub"},"message":"Starting Pub/Sub Emulator with command {\"binary\":\"/home/martijn/.cache/firebase/emulators/pubsub-emulator-0.1.0/pubsub-emulator/bin/cloud-pubsub-emulator\",\"args\":[\"--host=localhost\",\"--port=8083\"],\"optionalArgs\":[\"port\",\"host\"],\"joinArgs\":true}"}}
+ {"metadata":{"emulator":{"name":"firestore"},"message":"localhost:8084\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=localhost:8084\n\nDev App Server is now running.\n\n"}}
+[debug] [2021-11-09T20:31:32.414Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"pubsub"},"message":"Ignoring unsupported arg: projectId"}}
+[debug] [2021-11-09T20:31:32.414Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"pubsub"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2021-11-09T20:31:32.414Z] Starting Pub/Sub Emulator with command {"binary":"/home/martijn/.cache/firebase/emulators/pubsub-emulator-0.1.0/pubsub-emulator/bin/cloud-pubsub-emulator","args":["--host=localhost","--port=8083"],"optionalArgs":["port","host"],"joinArgs":true} {"metadata":{"emulator":{"name":"pubsub"},"message":"Starting Pub/Sub Emulator with command {\"binary\":\"/home/martijn/.cache/firebase/emulators/pubsub-emulator-0.1.0/pubsub-emulator/bin/cloud-pubsub-emulator\",\"args\":[\"--host=localhost\",\"--port=8083\"],\"optionalArgs\":[\"port\",\"host\"],\"joinArgs\":true}"}}
 [info] i  pubsub: Pub/Sub Emulator logging to pubsub-debug.log {"metadata":{"emulator":{"name":"pubsub"},"message":"Pub/Sub Emulator logging to \u001b[1mpubsub-debug.log\u001b[22m"}}
-[debug] [2021-11-09T16:40:05.738Z] This is the Google Pub/Sub fake.
+[debug] [2021-11-09T20:31:32.516Z] This is the Google Pub/Sub fake.
 Implementation may be incomplete or differ from the real system.
  {"metadata":{"emulator":{"name":"pubsub"},"message":"This is the Google Pub/Sub fake.\nImplementation may be incomplete or differ from the real system.\n"}}
-[debug] [2021-11-09T16:40:05.784Z] Nov 09, 2021 5:40:05 PM com.google.cloud.pubsub.testing.v1.Main main
+[debug] [2021-11-09T20:31:32.567Z] Nov 09, 2021 9:31:32 PM com.google.cloud.pubsub.testing.v1.Main main
 INFO: IAM integration is disabled. IAM policy methods and ACL checks are not supported
- {"metadata":{"emulator":{"name":"pubsub"},"message":"Nov 09, 2021 5:40:05 PM com.google.cloud.pubsub.testing.v1.Main main\nINFO: IAM integration is disabled. IAM policy methods and ACL checks are not supported\n"}}
-[debug] [2021-11-09T16:40:06.158Z] Nov 09, 2021 5:40:06 PM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround
+ {"metadata":{"emulator":{"name":"pubsub"},"message":"Nov 09, 2021 9:31:32 PM com.google.cloud.pubsub.testing.v1.Main main\nINFO: IAM integration is disabled. IAM policy methods and ACL checks are not supported\n"}}
+[debug] [2021-11-09T20:31:33.090Z] Nov 09, 2021 9:31:33 PM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround
 INFO: Applied Java 7 long hostname workaround.
- {"metadata":{"emulator":{"name":"pubsub"},"message":"Nov 09, 2021 5:40:06 PM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround\nINFO: Applied Java 7 long hostname workaround.\n"}}
-[debug] [2021-11-09T16:40:06.203Z] Nov 09, 2021 5:40:06 PM com.google.cloud.pubsub.testing.v1.Main main
+ {"metadata":{"emulator":{"name":"pubsub"},"message":"Nov 09, 2021 9:31:33 PM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround\nINFO: Applied Java 7 long hostname workaround.\n"}}
+[debug] [2021-11-09T20:31:33.151Z] Nov 09, 2021 9:31:33 PM com.google.cloud.pubsub.testing.v1.Main main
 INFO: Server started, listening on 8083
- {"metadata":{"emulator":{"name":"pubsub"},"message":"Nov 09, 2021 5:40:06 PM com.google.cloud.pubsub.testing.v1.Main main\nINFO: Server started, listening on 8083\n"}}
-[debug] [2021-11-09T16:40:06.406Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2021-11-09T16:40:06.406Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
-[debug] [2021-11-09T16:40:06.406Z] Starting Emulator UI with command {"binary":"node","args":["/home/martijn/.cache/firebase/emulators/ui-v1.6.3/server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"/home/martijn/.cache/firebase/emulators/ui-v1.6.3/server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+ {"metadata":{"emulator":{"name":"pubsub"},"message":"Nov 09, 2021 9:31:33 PM com.google.cloud.pubsub.testing.v1.Main main\nINFO: Server started, listening on 8083\n"}}
+[debug] [2021-11-09T20:31:33.179Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2021-11-09T20:31:33.179Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2021-11-09T20:31:33.179Z] Starting Emulator UI with command {"binary":"node","args":["/home/martijn/.cache/firebase/emulators/ui-v1.6.3/server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"/home/martijn/.cache/firebase/emulators/ui-v1.6.3/server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
 [info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
-[debug] [2021-11-09T16:40:06.479Z] Nov 09, 2021 5:40:06 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+[debug] [2021-11-09T20:31:33.278Z] Nov 09, 2021 9:31:33 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
- {"metadata":{"emulator":{"name":"pubsub"},"message":"Nov 09, 2021 5:40:06 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete\nINFO: Adding handler(s) to newly registered Channel.\n"}}
-[debug] [2021-11-09T16:40:06.595Z] Web / API server started at localhost:8081
+ {"metadata":{"emulator":{"name":"pubsub"},"message":"Nov 09, 2021 9:31:33 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete\nINFO: Adding handler(s) to newly registered Channel.\n"}}
+[debug] [2021-11-09T20:31:33.376Z] Web / API server started at localhost:8081
  {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:8081\n"}}
 [info] 
 ┌─────────────────────────────────────────────────────────────┐
@@ -74,3 +74,27 @@ INFO: Adding handler(s) to newly registered Channel.
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
+[debug] [2021-11-09T20:31:36.897Z] Nov 09, 2021 9:31:36 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:31:36 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2021-11-09T20:31:37.293Z] Nov 09, 2021 9:31:37 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:31:37 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2021-11-09T20:31:40.880Z] Nov 09, 2021 9:31:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:31:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2021-11-09T20:31:42.924Z] Nov 09, 2021 9:31:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:31:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2021-11-09T20:31:44.964Z] Nov 09, 2021 9:31:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:31:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2021-11-09T20:31:47.016Z] Nov 09, 2021 9:31:47 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:31:47 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2021-11-09T20:31:49.055Z] Nov 09, 2021 9:31:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:31:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2021-11-09T20:34:56.383Z] Nov 09, 2021 9:34:56 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Nov 09, 2021 9:34:56 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}

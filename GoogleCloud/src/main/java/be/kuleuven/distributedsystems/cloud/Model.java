@@ -27,7 +27,6 @@ public class Model {
      * @return A List of {@link Show} objects.
      */
     public List<Show> getShows() {
-
         var shows = builder
                             .baseUrl("https://reliabletheatrecompany.com/")
                             .build()
@@ -52,17 +51,18 @@ public class Model {
      * @return A {@link Show} object.
      */
     public Show getShow(String company, UUID showId) {
-        return builder
+        var show = builder
                 .baseUrl("https://reliabletheatrecompany.com/")
                 .build()
                 .get()
-                .uri(builder1 -> builder1
+                .uri(builder -> builder
                         .pathSegment("shows/{showId}")
                         .queryParam("key", API_KEY)
                         .build(showId.toString()))
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Show>() {})
                 .block();
+        return show;
     }
 
     /**
@@ -77,8 +77,8 @@ public class Model {
                 .baseUrl("https://reliabletheatrecompany.com/")
                 .build()
                 .get()
-                .uri(builder1 -> builder1
-                        .pathSegment("shows/{showId}/shows")
+                .uri(builder -> builder
+                        .pathSegment("shows/{showId}/times")
                         .queryParam("key", API_KEY)
                         .build(showId.toString()))
                 .retrieve()
