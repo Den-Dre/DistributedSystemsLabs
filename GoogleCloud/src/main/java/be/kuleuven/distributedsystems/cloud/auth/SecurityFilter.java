@@ -1,6 +1,9 @@
 package be.kuleuven.distributedsystems.cloud.auth;
 
 import be.kuleuven.distributedsystems.cloud.entities.User;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,10 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -26,10 +26,28 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var session = WebUtils.getCookie(request, "session");
+        User user;
         if (session != null) {
-            // TODO: (level 1) decode Identity Token and assign correct email and role
+
+            try {
+                DecodedJWT jwt = JWT.decode(session.getValue());
+                String role = jwt.getClaim("role").asString();
+                if (!"manager".equals(role))
+                        role = "";
+//                role = jwt.getClaim("role").asString().equals("manager") ? "manager" : "";
+                String mail = jwt.getClaim("email").asString();
+                user = new User(mail, role);
+
+                jwt.getClaims().keySet().forEach(System.out::println);
+            } catch (JWTDecodeException e) {
+                System.out.println(e);
+                user = new User("", "");
+            }
+//            System.out.println(Arrays.toString(request.getCookies()));
+//            System.out.println(Arrays.stream(request.getCookies()).findFirst().get().getValue());
+
+            // TODO: (level 1) decode Identity Token and assign correct email and role (Done?)
             // TODO: (level 2) verify Identity Token
-            var user = new User("test@example.com", "");
 
             SecurityContext context = SecurityContextHolder.getContext();
             context.setAuthentication(new FirebaseAuthentication(user));

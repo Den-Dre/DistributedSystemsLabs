@@ -7,10 +7,12 @@ import be.kuleuven.distributedsystems.cloud.entities.Show;
 import be.kuleuven.distributedsystems.cloud.entities.Ticket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDateTime;
@@ -150,11 +152,17 @@ public class ViewController {
             @CookieValue(value = "cart", required = false) String cartString) throws Exception {
         // TODO: limit this function to managers
 
+        System.out.println("managerpage!!");
+
+        if (!AuthController.getUser().isManager())
+            throw new AccessDeniedException("no manager");
+
         List<Quote> quotes = Cart.fromCookie(cartString);
         ModelAndView modelAndView = new ModelAndView("manager");
         modelAndView.addObject("cartLength",
                 Integer.toString(quotes.size()));
         modelAndView.addObject("manager", AuthController.getUser().isManager());
+
         var bookings = this.model.getAllBookings();
 
         var shows = new HashMap<UUID, Show>();

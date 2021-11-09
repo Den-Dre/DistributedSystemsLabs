@@ -1,7 +1,12 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
+import org.eclipse.jetty.server.RequestLog;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -9,8 +14,25 @@ import java.util.*;
 @Component
 public class Model {
 
+    @Autowired
+    private final WebClient.Builder builder = WebClient.builder();
+
+    private final String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
+
     public List<Show> getShows() {
-        // TODO: return all shows
+        var shows = Objects.requireNonNull(builder
+                        .baseUrl("https://134.58.44.57/")
+                        .build()
+                        .get()
+                        .uri(uriBuilder -> uriBuilder
+                                .pathSegment("shows")
+                                .queryParam("key", API_KEY)
+                                .build())
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
+                        .block())
+                .getContent();
+
         return new ArrayList<>();
     }
 
