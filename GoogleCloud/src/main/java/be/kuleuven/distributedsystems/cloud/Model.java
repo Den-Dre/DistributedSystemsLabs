@@ -21,6 +21,11 @@ public class Model {
 
     private final String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
+    /**
+     * Fetch all shows from the API-endpoint.
+     *
+     * @return A List of {@link Show} objects.
+     */
     public List<Show> getShows() {
 
         var shows = builder
@@ -39,11 +44,25 @@ public class Model {
         return List.copyOf(shows);
     }
 
-    // builder.baseUrl("https://134.58.44.57/").build().get().uri(uriBuilder -> uriBuilder.pathSegment("shows").queryParam("key", API_KEY).build()).retrieve().bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
-
+    /**
+     * Fetch a {@link Show} given the company name and the showId.
+     *
+     * @param company String representing a company (e.g. "reliabletheatrecompany")
+     * @param showId The id of a show.
+     * @return A {@link Show} object.
+     */
     public Show getShow(String company, UUID showId) {
-        // TODO: return the given show
-        return null;
+        return builder
+                .baseUrl("https://reliabletheatrecompany.com/")
+                .build()
+                .get()
+                .uri(builder1 -> builder1
+                        .pathSegment("shows/{showId}")
+                        .queryParam("key", API_KEY)
+                        .build(showId.toString()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Show>() {})
+                .block();
     }
 
     public List<LocalDateTime> getShowTimes(String company, UUID showId) {
