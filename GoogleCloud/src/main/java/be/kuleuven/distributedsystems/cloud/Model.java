@@ -65,14 +65,54 @@ public class Model {
                 .block();
     }
 
+    /**
+     * Get a list of all the times a show is played.
+     *
+     * @param company String representing a company (e.g. "reliabletheatrecompany")
+     * @param showId The id of the show to get the times of.
+     * @return A List of {@link LocalDateTime} objects.
+     */
     public List<LocalDateTime> getShowTimes(String company, UUID showId) {
-        // TODO: return a list with all possible times for the given show
-        return new ArrayList<>();
+        var times = builder
+                .baseUrl("https://reliabletheatrecompany.com/")
+                .build()
+                .get()
+                .uri(builder1 -> builder1
+                        .pathSegment("shows/{showId}/shows")
+                        .queryParam("key", API_KEY)
+                        .build(showId.toString()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<CollectionModel<LocalDateTime>>() {})
+                .block()
+                .getContent();
+        // System.out.println(times);
+        return List.copyOf(times);
     }
 
+    /**
+     * Get a list of available seats for a given show at a given time at a given company.
+     *
+     * @param company String representing a company (e.g. "reliabletheatrecompany")
+     * @param showId The id of the show to get the available seats of.
+     * @param time The time at which to look for available seats.
+     * @return A list of available {@link Seat} objects.
+     */
     public List<Seat> getAvailableSeats(String company, UUID showId, LocalDateTime time) {
-        // TODO: return all available seats for a given show and time
-        return new ArrayList<>();
+        var seats = builder
+                .baseUrl("https://reliabletheatrecompany.com/")
+                .build()
+                .get()
+                .uri(builder -> builder
+                        .pathSegment("shows/{showId}/seats")
+                        .queryParam("key", API_KEY)
+                        .queryParam("time", time.toString())
+                        .queryParam("available", "true")
+                        .build(showId.toString()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<CollectionModel<Seat>>() {})
+                .block()
+                .getContent();
+        return List.copyOf(seats);
     }
 
     public Seat getSeat(String company, UUID showId, UUID seatId) {
