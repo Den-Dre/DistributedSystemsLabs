@@ -34,17 +34,17 @@ public class SecurityFilter extends OncePerRequestFilter {
                 String role = jwt.getClaim("role").asString();
                 if (!"manager".equals(role))
                         role = "";
-//                role = jwt.getClaim("role").asString().equals("manager") ? "manager" : "";
+
                 String mail = jwt.getClaim("email").asString();
                 user = new User(mail, role);
 
-                jwt.getClaims().keySet().forEach(System.out::println);
+                //jwt.getClaims().keySet().forEach(System.out::println);
             } catch (JWTDecodeException e) {
                 System.out.println(e);
+                System.out.println("decode-exception");
                 user = new User("", "");
             }
-//            System.out.println(Arrays.toString(request.getCookies()));
-//            System.out.println(Arrays.stream(request.getCookies()).findFirst().get().getValue());
+
 
             // TODO: (level 1) decode Identity Token and assign correct email and role (Done?)
             // TODO: (level 2) verify Identity Token
@@ -99,6 +99,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         @Override
         public void setAuthenticated(boolean b) throws IllegalArgumentException {
+
 
         }
 

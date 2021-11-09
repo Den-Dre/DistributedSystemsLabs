@@ -1,12 +1,14 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
+import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.jetty.server.RequestLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriBuilder;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -20,21 +22,24 @@ public class Model {
     private final String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
     public List<Show> getShows() {
-        var shows = Objects.requireNonNull(builder
-                        .baseUrl("https://134.58.44.57/")
-                        .build()
-                        .get()
-                        .uri(uriBuilder -> uriBuilder
-                                .pathSegment("shows")
-                                .queryParam("key", API_KEY)
-                                .build())
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
-                        .block())
-                .getContent();
 
-        return new ArrayList<>();
+        var shows = builder
+                            .baseUrl("https://reliabletheatrecompany.com/")
+                            .build()
+                            .get()
+                            .uri(builder -> builder
+                                    .pathSegment("shows")
+                                    .queryParam("key", API_KEY)
+                                    .build())
+                            .retrieve()
+                            .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
+                            .block()
+                            .getContent();
+
+        return List.copyOf(shows);
     }
+
+    // builder.baseUrl("https://134.58.44.57/").build().get().uri(uriBuilder -> uriBuilder.pathSegment("shows").queryParam("key", API_KEY).build()).retrieve().bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
 
     public Show getShow(String company, UUID showId) {
         // TODO: return the given show
