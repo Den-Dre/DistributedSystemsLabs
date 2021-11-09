@@ -116,7 +116,17 @@ public class Model {
     }
 
     public Seat getSeat(String company, UUID showId, UUID seatId) {
-        // TODO: return the given seat
+
+        // HELP!!: mega inefficient omdat ge moet loopen over alle times
+        var showTimes = getShowTimes(company, showId);
+        for (LocalDateTime showTime: showTimes) {
+            var possibleSeats = getAvailableSeats(company, showId, showTime);
+            for (Seat seat: possibleSeats) {
+                if (seat.getSeatId().equals(seatId)) {
+                    return seat;
+                }
+            }
+        }
         return null;
     }
 
