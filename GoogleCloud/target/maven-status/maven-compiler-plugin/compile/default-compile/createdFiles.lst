@@ -1,6 +1,8 @@
 be/kuleuven/distributedsystems/cloud/entities/Booking.class
 be/kuleuven/distributedsystems/cloud/controller/Cart$1.class
 be/kuleuven/distributedsystems/cloud/entities/Show.class
+be/kuleuven/distributedsystems/cloud/Model$2.class
+be/kuleuven/distributedsystems/cloud/Model$4.class
 be/kuleuven/distributedsystems/cloud/controller/ViewController.class
 be/kuleuven/distributedsystems/cloud/entities/Ticket.class
 be/kuleuven/distributedsystems/cloud/Application.class
@@ -9,6 +11,7 @@ be/kuleuven/distributedsystems/cloud/auth/WebSecurityConfig.class
 be/kuleuven/distributedsystems/cloud/controller/AuthController.class
 be/kuleuven/distributedsystems/cloud/controller/Cart.class
 be/kuleuven/distributedsystems/cloud/auth/SecurityFilter.class
+be/kuleuven/distributedsystems/cloud/Model$3.class
 be/kuleuven/distributedsystems/cloud/Model$1.class
 be/kuleuven/distributedsystems/cloud/entities/User.class
 be/kuleuven/distributedsystems/cloud/auth/SecurityFilter$FirebaseAuthentication.class
