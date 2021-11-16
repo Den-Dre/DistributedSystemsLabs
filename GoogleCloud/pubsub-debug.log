@@ -1,10 +1,22 @@
 This is the Google Pub/Sub fake.
 Implementation may be incomplete or differ from the real system.
-Nov 09, 2021 9:31:32 PM com.google.cloud.pubsub.testing.v1.Main main
+Nov 16, 2021 10:41:35 AM com.google.cloud.pubsub.testing.v1.Main main
 INFO: IAM integration is disabled. IAM policy methods and ACL checks are not supported
-Nov 09, 2021 9:31:33 PM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround
+Nov 16, 2021 10:41:36 AM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround
 INFO: Applied Java 7 long hostname workaround.
-Nov 09, 2021 9:31:33 PM com.google.cloud.pubsub.testing.v1.Main main
+Nov 16, 2021 10:41:36 AM com.google.cloud.pubsub.testing.v1.Main main
 INFO: Server started, listening on 8083
-Nov 09, 2021 9:31:33 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Nov 16, 2021 10:41:36 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
+Nov 16, 2021 12:50:37 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+INFO: Adding handler(s) to newly registered Channel.
+Nov 16, 2021 12:50:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Nov 16, 2021 12:50:37 PM io.gapi.emulators.netty.NotFoundHandler handleRequest
+INFO: Unknown request URI: /favicon.ico
+Nov 16, 2021 1:03:38 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+INFO: Adding handler(s) to newly registered Channel.
+Nov 16, 2021 1:03:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Nov 16, 2021 1:03:38 PM io.gapi.emulators.netty.NotFoundHandler handleRequest
+INFO: Unknown request URI: /favicon.ico

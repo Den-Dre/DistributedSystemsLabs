@@ -1,17 +1,28 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
-import org.apache.http.client.utils.URIBuilder;
-import org.eclipse.jetty.server.RequestLog;
+import com.google.api.gax.core.CredentialsProvider;
+import com.google.api.gax.core.NoCredentialsProvider;
+import com.google.api.gax.grpc.GrpcTransportChannel;
+import com.google.api.gax.rpc.FixedTransportChannelProvider;
+import com.google.api.gax.rpc.TransportChannelProvider;
+import com.google.cloud.pubsub.v1.Publisher;
+import com.google.cloud.pubsub.v1.TopicAdminClient;
+import com.google.cloud.pubsub.v1.TopicAdminSettings;
+import com.google.pubsub.v1.PubsubMessage;
+import com.google.pubsub.v1.TopicName;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class Model {
@@ -19,7 +30,21 @@ public class Model {
     @Autowired
     private final WebClient.Builder builder = WebClient.builder();
 
-    private final String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
+    private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
+
+    // We may assume there's only one active booking at once: this is allowed to be stored in memory
+    private final ArrayList<Booking> bookings = new ArrayList<>();
+
+    private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
+
+
+    /**
+     * Add the given booking to the list of kept bookings.
+     * @param booking: the {@link Booking} to be added.
+     */
+    private void addBooking(Booking booking) {
+        bookings.add(booking);
+    }
 
     /**
      * Fetch all shows from the API-endpoint.
@@ -116,41 +141,149 @@ public class Model {
     }
 
     public Seat getSeat(String company, UUID showId, UUID seatId) {
+        var seat = builder
+                .baseUrl("https://reliabletheatrecompany.com/")
+                .build()
+                .get()
+                .uri(builder -> builder
+                        .pathSegment("shows/{showId}/seats/{seatId}")
+                        .queryParam("key", API_KEY)
+                        .build(showId.toString(), seatId.toString()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Seat>() {})
+                .block();
+        return seat;
+    }
 
-        // HELP!!: mega inefficient omdat ge moet loopen over alle times
-        var showTimes = getShowTimes(company, showId);
-        for (LocalDateTime showTime: showTimes) {
-            var possibleSeats = getAvailableSeats(company, showId, showTime);
-            for (Seat seat: possibleSeats) {
-                if (seat.getSeatId().equals(seatId)) {
-                    return seat;
+    /**
+     * Get the ticket associated to the given parameters
+     *
+     * @param company: the company where the ticket was purchased
+     * @param showId: the id of the show the ticket was purchased for
+     * @param seatId: the id of the seat the ticket was purchased for
+     * @return t iff. there exists a ticket with attributes matching to the parameters;
+     *         else {@code null} is returned.
+     */
+    public Ticket getTicket(String company, UUID showId, UUID seatId) {
+        for (Booking b : getAllBookings()) {
+            for (Ticket t : b.getTickets()) {
+                if (t.getCompany().equals(company) && t.getShowId().equals(showId) && t.getSeatId().equals(seatId)) {
+                    return t;
                 }
             }
         }
+
         return null;
     }
 
-    public Ticket getTicket(String company, UUID showId, UUID seatId) {
-        // TODO: return the ticket for the given seat
-        return null;
-    }
-
+    /**
+     * Return all bookings made by the given {@code customer}.
+     *
+     * @param customer: the email address of the given {@code customer}
+     * @return bookings: a list of bookings made by the given {@code customer}
+     */
     public List<Booking> getBookings(String customer) {
-        // TODO: return all bookings from the customer
-        return new ArrayList<>();
+        var bookings = getAllBookings();
+        return bookings
+                .stream()
+                .filter(b -> b.getCustomer().equals(customer))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    /**
+     * Return all bookings that have been made up until now.
+     * @return bookings: a list of all made bookings
+     */
     public List<Booking> getAllBookings() {
-        // TODO: return all bookings
-        return new ArrayList<>();
+        return bookings;
     }
 
     public Set<String> getBestCustomers() {
         // TODO: return the best customer (highest number of tickets, return all of them if multiple customers have an equal amount)
-        return null;
+        // Source: https://stackoverflow.com/a/11256352
+        HashSet<String> bestCustomers = new HashSet<>();
+        if (bestCustomersList.isEmpty()) return null;
+        int maxValueInMap=(Collections.max(bestCustomersList.values()));  // This will return max value in the HashMap
+        for (Map.Entry<String, Integer> entry : bestCustomersList.entrySet()) {  // Iterate through HashMap
+            if (entry.getValue()==maxValueInMap) {
+                bestCustomers.add(entry.getKey());
+            }
+        }
+        return bestCustomers;
     }
 
+    /**
+     * Convert the given list of {@link Quote}s into {@link Ticket}s
+     * and add these to the current {@link Booking}.
+     *
+     * @param quotes: The list of {@link Quote}s to be converted and added
+     * @param customer: The customer who has made the given {@link Quote}s
+     */
     public void confirmQuotes(List<Quote> quotes, String customer) {
-        // TODO: reserve all seats for the given quotes
+        ArrayList<Ticket> tickets = quotes.stream().map(
+                q -> new Ticket(q.getCompany(), q.getShowId(), q.getSeatId(), UUID.randomUUID(), customer)
+        ).collect(Collectors.toCollection(ArrayList::new));
+
+        // source https://cloud.google.com/pubsub/docs/emulator#accessing_environment_variables
+        String hostport = "localhost:8083"; // localhost of emulator
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
+        try {
+            TransportChannelProvider channelProvider =
+                    FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
+            CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
+
+            // Set the channel and credentials provider when creating a `TopicAdminClient`.
+            // Similarly for SubscriptionAdminClient
+            TopicAdminClient topicClient =
+                    TopicAdminClient.create(
+                            TopicAdminSettings.newBuilder()
+                                    .setTransportChannelProvider(channelProvider)
+                                    .setCredentialsProvider(credentialsProvider)
+                                    .build());
+
+            TopicName topicName = TopicName.of("demo-distributed-systems-kul", "myTopic");
+            // Set the channel and credentials provider when creating a `Publisher`.
+            // Similarly for Subscriber
+            Publisher publisher =
+                    Publisher.newBuilder(topicName)
+                            .setChannelProvider(channelProvider)
+                            .setCredentialsProvider(credentialsProvider)
+                            .build();
+
+            for (Quote q : quotes) {
+
+//                PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
+//                        .setData()
+                // TODO see slides: create message, encode into data, give data to
+                // PubsubMessage.builder and publish
+
+                var putResult = builder
+                        .baseUrl("https://reliabletheatrecompany.com/")
+                        .build()
+                        .put()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}/seats/{seatId}/ticket")
+                                .queryParam("customer", customer)
+                                .queryParam("key", API_KEY)
+                                .build(q.getShowId().toString(), q.getSeatId().toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Ticket>() {
+                        })
+                        .block();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            channel.shutdown();
+        }
+
+
+
+
+        addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, customer));
+        if (bestCustomersList.containsKey(customer))
+            bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
+        else
+            bestCustomersList.put(customer, tickets.size());
     }
 }
