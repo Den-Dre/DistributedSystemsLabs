@@ -61,4 +61,7 @@ public class APIController {
         headers.add(HttpHeaders.LOCATION, "/account");
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
+
+    // TODO receive the serialized quotes from Model.java, deserialze them
+    // and put into PUT request
 }

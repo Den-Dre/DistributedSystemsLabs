@@ -1,17 +1,25 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
-import org.apache.http.client.utils.URIBuilder;
-import org.eclipse.jetty.server.RequestLog;
+import com.google.api.gax.core.CredentialsProvider;
+import com.google.api.gax.core.NoCredentialsProvider;
+import com.google.api.gax.grpc.GrpcTransportChannel;
+import com.google.api.gax.rpc.FixedTransportChannelProvider;
+import com.google.api.gax.rpc.TransportChannelProvider;
+import com.google.cloud.pubsub.v1.Publisher;
+import com.google.cloud.pubsub.v1.TopicAdminClient;
+import com.google.cloud.pubsub.v1.TopicAdminSettings;
+import com.google.pubsub.v1.PubsubMessage;
+import com.google.pubsub.v1.TopicName;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
 
-import java.lang.reflect.Array;
-import java.security.Timestamp;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,6 +34,9 @@ public class Model {
 
     // We may assume there's only one active booking at once: this is allowed to be stored in memory
     private final ArrayList<Booking> bookings = new ArrayList<>();
+
+    private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
+
 
     /**
      * Add the given booking to the list of kept bookings.
@@ -130,18 +141,18 @@ public class Model {
     }
 
     public Seat getSeat(String company, UUID showId, UUID seatId) {
-
-        // HELP!!: mega inefficient omdat ge moet loopen over alle times
-        var showTimes = getShowTimes(company, showId);
-        for (LocalDateTime showTime: showTimes) {
-            var possibleSeats = getAvailableSeats(company, showId, showTime);
-            for (Seat seat: possibleSeats) {
-                if (seat.getSeatId().equals(seatId)) {
-                    return seat;
-                }
-            }
-        }
-        return null;
+        var seat = builder
+                .baseUrl("https://reliabletheatrecompany.com/")
+                .build()
+                .get()
+                .uri(builder -> builder
+                        .pathSegment("shows/{showId}/seats/{seatId}")
+                        .queryParam("key", API_KEY)
+                        .build(showId.toString(), seatId.toString()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Seat>() {})
+                .block();
+        return seat;
     }
 
     /**
@@ -161,6 +172,7 @@ public class Model {
                 }
             }
         }
+
         return null;
     }
 
@@ -188,7 +200,16 @@ public class Model {
 
     public Set<String> getBestCustomers() {
         // TODO: return the best customer (highest number of tickets, return all of them if multiple customers have an equal amount)
-        return null;
+        // Source: https://stackoverflow.com/a/11256352
+        HashSet<String> bestCustomers = new HashSet<>();
+        if (bestCustomersList.isEmpty()) return null;
+        int maxValueInMap=(Collections.max(bestCustomersList.values()));  // This will return max value in the HashMap
+        for (Map.Entry<String, Integer> entry : bestCustomersList.entrySet()) {  // Iterate through HashMap
+            if (entry.getValue()==maxValueInMap) {
+                bestCustomers.add(entry.getKey());
+            }
+        }
+        return bestCustomers;
     }
 
     /**
@@ -202,6 +223,67 @@ public class Model {
         ArrayList<Ticket> tickets = quotes.stream().map(
                 q -> new Ticket(q.getCompany(), q.getShowId(), q.getSeatId(), UUID.randomUUID(), customer)
         ).collect(Collectors.toCollection(ArrayList::new));
+
+        // source https://cloud.google.com/pubsub/docs/emulator#accessing_environment_variables
+        String hostport = "localhost:8083"; // localhost of emulator
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
+        try {
+            TransportChannelProvider channelProvider =
+                    FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
+            CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
+
+            // Set the channel and credentials provider when creating a `TopicAdminClient`.
+            // Similarly for SubscriptionAdminClient
+            TopicAdminClient topicClient =
+                    TopicAdminClient.create(
+                            TopicAdminSettings.newBuilder()
+                                    .setTransportChannelProvider(channelProvider)
+                                    .setCredentialsProvider(credentialsProvider)
+                                    .build());
+
+            TopicName topicName = TopicName.of("demo-distributed-systems-kul", "myTopic");
+            // Set the channel and credentials provider when creating a `Publisher`.
+            // Similarly for Subscriber
+            Publisher publisher =
+                    Publisher.newBuilder(topicName)
+                            .setChannelProvider(channelProvider)
+                            .setCredentialsProvider(credentialsProvider)
+                            .build();
+
+            for (Quote q : quotes) {
+
+//                PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
+//                        .setData()
+                // TODO see slides: create message, encode into data, give data to
+                // PubsubMessage.builder and publish
+
+                var putResult = builder
+                        .baseUrl("https://reliabletheatrecompany.com/")
+                        .build()
+                        .put()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}/seats/{seatId}/ticket")
+                                .queryParam("customer", customer)
+                                .queryParam("key", API_KEY)
+                                .build(q.getShowId().toString(), q.getSeatId().toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Ticket>() {
+                        })
+                        .block();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            channel.shutdown();
+        }
+
+
+
+
         addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, customer));
+        if (bestCustomersList.containsKey(customer))
+            bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
+        else
+            bestCustomersList.put(customer, tickets.size());
     }
 }

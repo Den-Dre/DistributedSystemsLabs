@@ -15,6 +15,8 @@ be/kuleuven/distributedsystems/cloud/Model$3.class
 be/kuleuven/distributedsystems/cloud/Model$1.class
 be/kuleuven/distributedsystems/cloud/entities/User.class
 be/kuleuven/distributedsystems/cloud/auth/SecurityFilter$FirebaseAuthentication.class
+be/kuleuven/distributedsystems/cloud/Model$5.class
 be/kuleuven/distributedsystems/cloud/controller/APIController.class
+be/kuleuven/distributedsystems/cloud/Model$6.class
 be/kuleuven/distributedsystems/cloud/entities/Seat.class
 be/kuleuven/distributedsystems/cloud/Model.class
