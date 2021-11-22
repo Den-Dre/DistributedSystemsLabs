@@ -1,5 +1,9 @@
 package be.kuleuven.distributedsystems.cloud;
 
+import com.google.cloud.pubsub.v1.SubscriptionAdminClient;
+import com.google.pubsub.v1.ProjectSubscriptionName;
+import com.google.pubsub.v1.PushConfig;
+import com.google.pubsub.v1.Subscription;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -17,11 +21,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.SSLException;
+import java.io.IOException;
 import java.util.Objects;
 
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @SpringBootApplication
 public class Application {
+    public static final String TOPIC = "ABCDEFGH";
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
@@ -30,6 +36,22 @@ public class Application {
         // Apache JSP scans by default all JARs, which is not necessary, so disable it
         System.setProperty(org.apache.tomcat.util.scan.Constants.SKIP_JARS_PROPERTY, "*.jar");
         System.setProperty(org.apache.tomcat.util.scan.Constants.SCAN_JARS_PROPERTY, "taglibs-standard-spec-*.jar,taglibs-standard-impl-*.jar");
+
+
+        SubscriptionAdminClient subscriptionAdminClient;
+//        try {
+//            String pushEndpoint = "localhost:8083/subscription";
+//            PushConfig pushConfig = PushConfig.newBuilder().setPushEndpoint(pushEndpoint).build();
+//            subscriptionAdminClient = SubscriptionAdminClient.create();
+//
+//            ProjectSubscriptionName subscriptionName =
+//                    ProjectSubscriptionName.of("demo-distributed-systems-kul", "testSubscriptionID");
+//            Subscription subscription =
+//                    subscriptionAdminClient.createSubscription(subscriptionName, "myTopic", pushConfig, 10);
+//            System.out.println("Created push subscription: " + subscription.getName());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         // Start Spring Boot application
         ApplicationContext context = SpringApplication.run(Application.class, args);
@@ -61,4 +83,5 @@ public class Application {
         firewall.setAllowUrlEncodedSlash(true);
         return firewall;
     }
+
 }
