@@ -46,12 +46,13 @@ public class APIController {
                     FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
             CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
 
-            String pushEndpoint = "http://localhost:8083/subscriptions";
+            String pushEndpoint = "http://localhost:8080_ah/push-handlers/test";
             PushConfig pushConfig = PushConfig.newBuilder().setPushEndpoint(pushEndpoint).build();
             subscriptionAdminClient = SubscriptionAdminClient.create(
-                    SubscriptionAdminSettings.newBuilder().
-                            setCredentialsProvider(credentialsProvider).
-                            setTransportChannelProvider(channelProvider).build());
+                    SubscriptionAdminSettings.newBuilder()
+                            .setCredentialsProvider(credentialsProvider)
+                            .setTransportChannelProvider(channelProvider)
+                            .build());
 
             TopicName topicName = TopicName.of("demo-distributed-systems-kul", Application.TOPIC);
             TopicAdminClient topicClient =
@@ -71,7 +72,7 @@ public class APIController {
                     ProjectSubscriptionName.of("demo-distributed-systems-kul", "testSubscriptionID");
             Subscription subscription;
             try {
-                subscription = subscriptionAdminClient.createSubscription(subscriptionName, topicName, pushConfig, 10);
+                subscription = subscriptionAdminClient.createSubscription(subscriptionName, topicName, pushConfig, 60);
                 System.out.println("Created push subscription: " + subscription.getName());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -126,10 +127,12 @@ public class APIController {
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
-    @PostMapping("/subscription")
-    public void confirmQuote(@RequestBody ByteString body ) {
-        System.out.println("Got into endpoint");
-    }
+//    @PostMapping("/test")
+//    public ResponseEntity<Void> confirmQuote(@RequestBody ByteString body ) {
+//        System.out.println("Got into endpoint");
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
     // TODO receive the serialized quotes from Model.java, deserialze them
     // and put into PUT request
+
 }
