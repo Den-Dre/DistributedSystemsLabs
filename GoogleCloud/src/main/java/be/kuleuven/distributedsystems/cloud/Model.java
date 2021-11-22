@@ -1,15 +1,19 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
+import com.google.api.core.ApiFuture;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.grpc.GrpcTransportChannel;
 import com.google.api.gax.rpc.FixedTransportChannelProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
+import com.google.cloud.ByteArray;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.cloud.pubsub.v1.TopicAdminClient;
 import com.google.cloud.pubsub.v1.TopicAdminSettings;
+import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
+import com.google.pubsub.v1.Topic;
 import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -19,9 +23,13 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -219,14 +227,17 @@ public class Model {
      * @param quotes: The list of {@link Quote}s to be converted and added
      * @param customer: The customer who has made the given {@link Quote}s
      */
-    public void confirmQuotes(List<Quote> quotes, String customer) {
+    public void confirmQuotes(List<Quote> quotes, String customer) throws InterruptedException {
         ArrayList<Ticket> tickets = quotes.stream().map(
                 q -> new Ticket(q.getCompany(), q.getShowId(), q.getSeatId(), UUID.randomUUID(), customer)
         ).collect(Collectors.toCollection(ArrayList::new));
 
         // source https://cloud.google.com/pubsub/docs/emulator#accessing_environment_variables
-        String hostport = "localhost:8083"; // localhost of emulator
+        // Use localhost of emulator instead of real endpoint!
+        String hostport = "localhost:8083";
         ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
+
+        Publisher publisher = null;
         try {
             TransportChannelProvider channelProvider =
                     FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
@@ -234,56 +245,75 @@ public class Model {
 
             // Set the channel and credentials provider when creating a `TopicAdminClient`.
             // Similarly for SubscriptionAdminClient
-            TopicAdminClient topicClient =
-                    TopicAdminClient.create(
-                            TopicAdminSettings.newBuilder()
-                                    .setTransportChannelProvider(channelProvider)
-                                    .setCredentialsProvider(credentialsProvider)
-                                    .build());
+            // TODO use this?
 
-            TopicName topicName = TopicName.of("demo-distributed-systems-kul", "myTopic");
+            TopicName topicName = TopicName.of("demo-distributed-systems-kul", Application.TOPIC);
+//            TopicAdminClient topicClient =
+//                    TopicAdminClient.create(
+//                            TopicAdminSettings.newBuilder()
+//                                    .setTransportChannelProvider(channelProvider)
+//                                    .setCredentialsProvider(credentialsProvider)
+//                                    .build());
+//            Topic topic = topicClient.createTopic(topicName);
+//            System.out.println("Topic toppie! " + topic.getName());
+
             // Set the channel and credentials provider when creating a `Publisher`.
             // Similarly for Subscriber
-            Publisher publisher =
-                    Publisher.newBuilder(topicName)
-                            .setChannelProvider(channelProvider)
-                            .setCredentialsProvider(credentialsProvider)
-                            .build();
+            publisher = Publisher.newBuilder(topicName)
+                    .setChannelProvider(channelProvider)
+                    .setCredentialsProvider(credentialsProvider)
+                    .build();
 
-            for (Quote q : quotes) {
+            // #### Create message from quotes
+            // https://cloud.google.com/pubsub/docs/quickstart-client-libraries#publish_messages
+            // Serialize quotes
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(quotes);
+            byte[] bytes = bos.toByteArray();
+            ByteString data = ByteString.copyFrom(bytes);
 
-//                PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
-//                        .setData()
+            PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
+
+            ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
+            String messageId = messageIdFuture.get();
+            System.out.println("Published message ID: " + messageId);
+
+            // TODO move this to APIController
+//            for (Quote q : quotes) {
+
                 // TODO see slides: create message, encode into data, give data to
                 // PubsubMessage.builder and publish
 
-                var putResult = builder
-                        .baseUrl("https://reliabletheatrecompany.com/")
-                        .build()
-                        .put()
-                        .uri(builder -> builder
-                                .pathSegment("shows/{showId}/seats/{seatId}/ticket")
-                                .queryParam("customer", customer)
-                                .queryParam("key", API_KEY)
-                                .build(q.getShowId().toString(), q.getSeatId().toString()))
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<Ticket>() {
-                        })
-                        .block();
-            }
-        } catch (IOException e) {
+//                var putResult = builder
+//                        .baseUrl("https://reliabletheatrecompany.com/")
+//                        .build()
+//                        .put()
+//                        .uri(builder -> builder
+//                                .pathSegment("shows/{showId}/seats/{seatId}/ticket")
+//                                .queryParam("customer", customer)
+//                                .queryParam("key", API_KEY)
+//                                .build(q.getShowId().toString(), q.getSeatId().toString()))
+//                        .retrieve()
+//                        .bodyToMono(new ParameterizedTypeReference<Ticket>() {
+//                        })
+//                        .block();
+//            }
+        } catch (IOException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
         } finally {
             channel.shutdown();
+            if (publisher != null) {
+                // When finished with the publisher, shutdown to free up resources.
+                publisher.shutdown();
+                publisher.awaitTermination(1, TimeUnit.MINUTES);
+            }
+
+//            addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, customer));
+//            if (bestCustomersList.containsKey(customer))
+//                bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
+//            else
+//                bestCustomersList.put(customer, tickets.size());
         }
-
-
-
-
-        addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, customer));
-        if (bestCustomersList.containsKey(customer))
-            bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
-        else
-            bestCustomersList.put(customer, tickets.size());
     }
 }
