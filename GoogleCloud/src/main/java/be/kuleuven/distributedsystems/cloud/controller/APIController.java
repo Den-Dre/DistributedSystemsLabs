@@ -46,7 +46,7 @@ public class APIController {
                     FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
             CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
 
-            String pushEndpoint = "http://localhost:8083/subscription";
+            String pushEndpoint = "http://localhost:8083/subscriptions";
             PushConfig pushConfig = PushConfig.newBuilder().setPushEndpoint(pushEndpoint).build();
             subscriptionAdminClient = SubscriptionAdminClient.create(
                     SubscriptionAdminSettings.newBuilder().
