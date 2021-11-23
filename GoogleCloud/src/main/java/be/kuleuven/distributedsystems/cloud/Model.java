@@ -21,11 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
+import org.springframework.util.SerializationUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class Model {
+
+    private static final int retryDelay = 1000;
 
     @Autowired
     private final WebClient.Builder builder = WebClient.builder();
@@ -59,7 +63,7 @@ public class Model {
      *
      * @return A List of {@link Show} objects.
      */
-    public List<Show> getShows() {
+    public List<Show> getShows()  {
         var shows = builder
                             .baseUrl("https://reliabletheatrecompany.com/")
                             .build()
@@ -72,8 +76,40 @@ public class Model {
                             .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
                             .block()
                             .getContent();
+        boolean succes = false;
+        Collection<Show>shows2 = null;
+        while (!succes) {
+            try {
+                shows2 = builder
+                        .baseUrl("https://unreliabletheatrecompany.com/")
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows")
+                                .queryParam("key", API_KEY)
+                                .build())
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
+                        .block()
+                        .getContent();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(retryDelay);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
 
-        return List.copyOf(shows);
+            }
+        }
+
+
+        List<Show> allShows = new ArrayList<>();
+        allShows.addAll(shows);
+        allShows.addAll(shows2);
+
+        return allShows;
     }
 
     /**
@@ -84,17 +120,33 @@ public class Model {
      * @return A {@link Show} object.
      */
     public Show getShow(String company, UUID showId) {
-        var show = builder
-                .baseUrl("https://reliabletheatrecompany.com/")
-                .build()
-                .get()
-                .uri(builder -> builder
-                        .pathSegment("shows/{showId}")
-                        .queryParam("key", API_KEY)
-                        .build(showId.toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Show>() {})
-                .block();
+        boolean succes = false;
+        Show show = null;
+        while (!succes) {
+            try {
+                show = builder
+                        .baseUrl(String.format("https://%s/", company))
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}")
+                                .queryParam("key", API_KEY)
+                                .build(showId.toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Show>() {})
+                        .block();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(retryDelay);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
+
+            }
+        }
+
         return show;
     }
 
@@ -106,18 +158,34 @@ public class Model {
      * @return A List of {@link LocalDateTime} objects.
      */
     public List<LocalDateTime> getShowTimes(String company, UUID showId) {
-        var times = builder
-                .baseUrl("https://reliabletheatrecompany.com/")
-                .build()
-                .get()
-                .uri(builder -> builder
-                        .pathSegment("shows/{showId}/times")
-                        .queryParam("key", API_KEY)
-                        .build(showId.toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<CollectionModel<LocalDateTime>>() {})
-                .block()
-                .getContent();
+        boolean succes = false;
+        Collection<LocalDateTime> times  = null;
+        while (!succes) {
+            try {
+                times = builder
+                        .baseUrl(String.format("https://%s/", company))
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}/times")
+                                .queryParam("key", API_KEY)
+                                .build(showId.toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<LocalDateTime>>() {})
+                        .block()
+                        .getContent();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(retryDelay);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
+
+            }
+        }
+
         // System.out.println(times);
         return List.copyOf(times);
     }
@@ -131,35 +199,67 @@ public class Model {
      * @return A list of available {@link Seat} objects.
      */
     public List<Seat> getAvailableSeats(String company, UUID showId, LocalDateTime time) {
-        var seats = builder
-                .baseUrl("https://reliabletheatrecompany.com/")
-                .build()
-                .get()
-                .uri(builder -> builder
-                        .pathSegment("shows/{showId}/seats")
-                        .queryParam("key", API_KEY)
-                        .queryParam("time", time.toString())
-                        .queryParam("available", "true")
-                        .build(showId.toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<CollectionModel<Seat>>() {})
-                .block()
-                .getContent();
+        boolean succes = false;
+        Collection<Seat> seats  = null;
+        while (!succes) {
+            try {
+                seats = builder
+                        .baseUrl(String.format("https://%s/", company))
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}/seats")
+                                .queryParam("key", API_KEY)
+                                .queryParam("time", time.toString())
+                                .queryParam("available", "true")
+                                .build(showId.toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Seat>>() {})
+                        .block()
+                        .getContent();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(retryDelay);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
+
+            }
+        }
         return List.copyOf(seats);
     }
 
     public Seat getSeat(String company, UUID showId, UUID seatId) {
-        var seat = builder
-                .baseUrl("https://reliabletheatrecompany.com/")
-                .build()
-                .get()
-                .uri(builder -> builder
-                        .pathSegment("shows/{showId}/seats/{seatId}")
-                        .queryParam("key", API_KEY)
-                        .build(showId.toString(), seatId.toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Seat>() {})
-                .block();
+        boolean succes = false;
+        Seat seat  = null;
+        while (!succes) {
+            try {
+                System.out.println("getSeat");
+                seat = builder
+                        .baseUrl(String.format("https://%s/", company))
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}/seats/{seatId}")
+                                .queryParam("key", API_KEY)
+                                .build(showId.toString(), seatId.toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Seat>() {})
+                        .block();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(500);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
+
+            }
+        }
+
         return seat;
     }
 
@@ -267,26 +367,32 @@ public class Model {
             // #### Create message from quotes
             // https://cloud.google.com/pubsub/docs/quickstart-client-libraries#publish_messages
             // Serialize quotes
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(quotes);
-            byte[] bytes = bos.toByteArray();
-            ByteString data = ByteString.copyFrom(bytes);
+//            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//            ObjectOutputStream oos = new ObjectOutputStream(bos);
+//            oos.writeObject(quotes);
+//            byte[] bytes = bos.toByteArray();
+//            ByteString data = ByteString.copyFrom(bytes);
 
-            PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
+            ArrayList<Quote> quotesArray = new ArrayList<>(quotes);
+
+            byte[] quotesSerialized = SerializationUtils.serialize(quotesArray);
+            // byte[] quotesSerializedEncoded = Base64.getEncoder().encode(quotesSerialized); // Do we need to encode to Base64
+            ByteString data = ByteString.copyFrom(quotesSerialized);
+
+            PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAttributes("customer", customer).putAttributes("apiKey", API_KEY).build();
 
             ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
             String messageId = messageIdFuture.get();
             System.out.println("Published message ID: " + messageId);
 
-            // TODO move this to APIController
+//            // TODO move this to APIController
 //            for (Quote q : quotes) {
-
-                // TODO see slides: create message, encode into data, give data to
-                // PubsubMessage.builder and publish
-
+//
+//                 // TODO see slides: create message, encode into data, give data to
+//                 // PubsubMessage.builder and publish
+//
 //                var putResult = builder
-//                        .baseUrl("https://reliabletheatrecompany.com/")
+//                        .baseUrl(String.format("https://%s/", q.getCompany()))
 //                        .build()
 //                        .put()
 //                        .uri(builder -> builder
