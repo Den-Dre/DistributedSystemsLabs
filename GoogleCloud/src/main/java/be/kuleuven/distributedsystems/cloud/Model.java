@@ -7,13 +7,9 @@ import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.grpc.GrpcTransportChannel;
 import com.google.api.gax.rpc.FixedTransportChannelProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
-import com.google.cloud.ByteArray;
 import com.google.cloud.pubsub.v1.Publisher;
-import com.google.cloud.pubsub.v1.TopicAdminClient;
-import com.google.cloud.pubsub.v1.TopicAdminSettings;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
-import com.google.pubsub.v1.Topic;
 import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -24,10 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -37,7 +30,7 @@ import java.util.stream.Collectors;
 @Component
 public class Model {
 
-    private static final int retryDelay = 1000;
+    private static final int RETRY_DELAY = 1000;
 
     @Autowired
     private final WebClient.Builder builder = WebClient.builder();
@@ -50,11 +43,18 @@ public class Model {
     private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
 
 
+    public void addBestCustomer(String customer, ArrayList<Ticket> tickets) {
+        if (bestCustomersList.containsKey(customer))
+            bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
+        else
+            bestCustomersList.put(customer, tickets.size());
+    }
+
     /**
      * Add the given booking to the list of kept bookings.
      * @param booking: the {@link Booking} to be added.
      */
-    private void addBooking(Booking booking) {
+    public void addBooking(Booking booking) {
         bookings.add(booking);
     }
 
@@ -96,7 +96,7 @@ public class Model {
             } catch (Exception e) {
                 System.out.println(e);
                 try {
-                    TimeUnit.MILLISECONDS.sleep(retryDelay);
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
                 } catch (InterruptedException e2) {
                     System.out.println(e2);
                 }
@@ -139,7 +139,7 @@ public class Model {
             } catch (Exception e) {
                 System.out.println(e);
                 try {
-                    TimeUnit.MILLISECONDS.sleep(retryDelay);
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
                 } catch (InterruptedException e2) {
                     System.out.println(e2);
                 }
@@ -178,7 +178,7 @@ public class Model {
             } catch (Exception e) {
                 System.out.println(e);
                 try {
-                    TimeUnit.MILLISECONDS.sleep(retryDelay);
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
                 } catch (InterruptedException e2) {
                     System.out.println(e2);
                 }
@@ -221,7 +221,7 @@ public class Model {
             } catch (Exception e) {
                 System.out.println(e);
                 try {
-                    TimeUnit.MILLISECONDS.sleep(retryDelay);
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
                 } catch (InterruptedException e2) {
                     System.out.println(e2);
                 }
@@ -236,7 +236,6 @@ public class Model {
         Seat seat  = null;
         while (!succes) {
             try {
-                System.out.println("getSeat");
                 seat = builder
                         .baseUrl(String.format("https://%s/", company))
                         .build()
@@ -291,7 +290,15 @@ public class Model {
      * @return bookings: a list of bookings made by the given {@code customer}
      */
     public List<Booking> getBookings(String customer) {
+        // Take the delay of the Pub Sub into account
+        try {
+            TimeUnit.MILLISECONDS.sleep(RETRY_DELAY/2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         var bookings = getAllBookings();
+        System.out.println("Current customer: " + customer);
+        bookings.forEach(b -> System.out.println("Booking x of Model.bookings: " + b.getCustomer()));
         return bookings
                 .stream()
                 .filter(b -> b.getCustomer().equals(customer))
@@ -303,6 +310,7 @@ public class Model {
      * @return bookings: a list of all made bookings
      */
     public List<Booking> getAllBookings() {
+
         return bookings;
     }
 
@@ -383,7 +391,6 @@ public class Model {
 
             ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
             String messageId = messageIdFuture.get();
-            System.out.println("Published message ID: " + messageId);
 
 //            // TODO move this to APIController
 //            for (Quote q : quotes) {

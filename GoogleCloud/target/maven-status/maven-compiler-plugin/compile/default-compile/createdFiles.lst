@@ -10,6 +10,7 @@ be/kuleuven/distributedsystems/cloud/controller/AuthController.class
 be/kuleuven/distributedsystems/cloud/controller/Cart.class
 be/kuleuven/distributedsystems/cloud/auth/SecurityFilter.class
 be/kuleuven/distributedsystems/cloud/Model$3.class
+be/kuleuven/distributedsystems/cloud/controller/PubSubController$2.class
 be/kuleuven/distributedsystems/cloud/auth/SecurityFilter$FirebaseAuthentication.class
 be/kuleuven/distributedsystems/cloud/Model$6.class
 be/kuleuven/distributedsystems/cloud/entities/Seat.class

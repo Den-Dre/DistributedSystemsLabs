@@ -62,7 +62,11 @@ public class APIController {
                                     .setCredentialsProvider(credentialsProvider)
                                     .build());
             try {
-                Topic topic = topicClient.createTopic(topicName);
+                Topic topic;
+                if (topicClient.getTopic(topicName) == null)
+                    topic = topicClient.createTopic(topicName);
+                else
+                    topic = topicClient.getTopic(topicName);
                 System.out.println("Topic toppie! " + topic.getName());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -72,7 +76,10 @@ public class APIController {
                     ProjectSubscriptionName.of("demo-distributed-systems-kul", "testSubscriptionID");
             Subscription subscription;
             try {
-                subscription = subscriptionAdminClient.createSubscription(subscriptionName, topicName, pushConfig, 60);
+                if (subscriptionAdminClient.getSubscription(subscriptionName) == null)
+                    subscription = subscriptionAdminClient.createSubscription(subscriptionName, topicName, pushConfig, 60);
+                else
+                    subscription = subscriptionAdminClient.getSubscription(subscriptionName);
                 System.out.println("Created push subscription: " + subscription.getName());
             } catch (Exception e) {
                 e.printStackTrace();
