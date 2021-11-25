@@ -46,7 +46,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
 
 
-            // TODO: (level 1) decode Identity Token and assign correct email and role (Done?)
+            // TODO: (level 1) decode Identity Token and assign correct email and role (Done? YYAAS)
             // TODO: (level 2) verify Identity Token
 
             SecurityContext context = SecurityContextHolder.getContext();

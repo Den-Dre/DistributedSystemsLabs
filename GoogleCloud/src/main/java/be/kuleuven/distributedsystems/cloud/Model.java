@@ -1,7 +1,6 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
-import com.google.api.core.ApiFuture;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.grpc.GrpcTransportChannel;
@@ -23,7 +22,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -185,8 +183,6 @@ public class Model {
 
             }
         }
-
-        // System.out.println(times);
         return List.copyOf(times);
     }
 
@@ -336,9 +332,6 @@ public class Model {
      * @param customer: The customer who has made the given {@link Quote}s
      */
     public void confirmQuotes(List<Quote> quotes, String customer) throws InterruptedException {
-        ArrayList<Ticket> tickets = quotes.stream().map(
-                q -> new Ticket(q.getCompany(), q.getShowId(), q.getSeatId(), UUID.randomUUID(), customer)
-        ).collect(Collectors.toCollection(ArrayList::new));
 
         // source https://cloud.google.com/pubsub/docs/emulator#accessing_environment_variables
         // Use localhost of emulator instead of real endpoint!
@@ -350,20 +343,7 @@ public class Model {
             TransportChannelProvider channelProvider =
                     FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
             CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
-
-            // Set the channel and credentials provider when creating a `TopicAdminClient`.
-            // Similarly for SubscriptionAdminClient
-            // TODO use this?
-
             TopicName topicName = TopicName.of("demo-distributed-systems-kul", Application.TOPIC);
-//            TopicAdminClient topicClient =
-//                    TopicAdminClient.create(
-//                            TopicAdminSettings.newBuilder()
-//                                    .setTransportChannelProvider(channelProvider)
-//                                    .setCredentialsProvider(credentialsProvider)
-//                                    .build());
-//            Topic topic = topicClient.createTopic(topicName);
-//            System.out.println("Topic toppie! " + topic.getName());
 
             // Set the channel and credentials provider when creating a `Publisher`.
             // Similarly for Subscriber
@@ -372,47 +352,12 @@ public class Model {
                     .setCredentialsProvider(credentialsProvider)
                     .build();
 
-            // #### Create message from quotes
-            // https://cloud.google.com/pubsub/docs/quickstart-client-libraries#publish_messages
-            // Serialize quotes
-//            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//            ObjectOutputStream oos = new ObjectOutputStream(bos);
-//            oos.writeObject(quotes);
-//            byte[] bytes = bos.toByteArray();
-//            ByteString data = ByteString.copyFrom(bytes);
-
             ArrayList<Quote> quotesArray = new ArrayList<>(quotes);
-
             byte[] quotesSerialized = SerializationUtils.serialize(quotesArray);
-            // byte[] quotesSerializedEncoded = Base64.getEncoder().encode(quotesSerialized); // Do we need to encode to Base64
             ByteString data = ByteString.copyFrom(quotesSerialized);
-
             PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAttributes("customer", customer).putAttributes("apiKey", API_KEY).build();
-
-            ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
-            String messageId = messageIdFuture.get();
-
-//            // TODO move this to APIController
-//            for (Quote q : quotes) {
-//
-//                 // TODO see slides: create message, encode into data, give data to
-//                 // PubsubMessage.builder and publish
-//
-//                var putResult = builder
-//                        .baseUrl(String.format("https://%s/", q.getCompany()))
-//                        .build()
-//                        .put()
-//                        .uri(builder -> builder
-//                                .pathSegment("shows/{showId}/seats/{seatId}/ticket")
-//                                .queryParam("customer", customer)
-//                                .queryParam("key", API_KEY)
-//                                .build(q.getShowId().toString(), q.getSeatId().toString()))
-//                        .retrieve()
-//                        .bodyToMono(new ParameterizedTypeReference<Ticket>() {
-//                        })
-//                        .block();
-//            }
-        } catch (IOException | ExecutionException | InterruptedException e) {
+            publisher.publish(pubsubMessage);
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             channel.shutdown();
@@ -421,12 +366,6 @@ public class Model {
                 publisher.shutdown();
                 publisher.awaitTermination(1, TimeUnit.MINUTES);
             }
-
-//            addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, customer));
-//            if (bestCustomersList.containsKey(customer))
-//                bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
-//            else
-//                bestCustomersList.put(customer, tickets.size());
         }
     }
 }

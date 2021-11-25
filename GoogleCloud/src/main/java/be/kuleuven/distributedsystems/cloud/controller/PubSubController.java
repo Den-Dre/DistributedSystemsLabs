@@ -7,7 +7,6 @@ import be.kuleuven.distributedsystems.cloud.entities.Ticket;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minidev.json.parser.ParseException;
-import org.eclipse.jetty.util.DateCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -21,7 +20,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -41,11 +39,8 @@ public class PubSubController {
     // <- Google documentatie is officieel poep
     @PostMapping("/push")
     public ResponseEntity<Void> confirmQuote(@RequestBody String message) throws ParseException {
-//        Gson g = new Gson();
-//        Json pubsubMessage = g.fromJson(message, JsonObject.class);
-//        System.out.println(pubsubMessage);
-        String customer = null;
-        ArrayList<Quote> quotes = null;
+        String customer;
+        ArrayList<Quote> quotes;
         ArrayList<Ticket> successfulTicketIDs = new ArrayList<>();
         String API_KEY = null;
 
@@ -98,6 +93,7 @@ public class PubSubController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    // Remove made bookings due to a duplicate booking being present in the list
     private void undoBookings(ArrayList<Ticket> toDelete, String API_KEY) {
         for (Ticket t : toDelete) {
             var ticket = builder
