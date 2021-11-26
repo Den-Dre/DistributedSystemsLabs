@@ -1,5 +1,6 @@
 \documentclass{ds-report} 
 \usepackage{babel}[dutch]
+\usepackage{graphicx}
 
 \assignment{Project} % Set to `Remote communication` or `Project`.
 \authorOne{Martijn Leplae} % Name of first team partner.
@@ -11,6 +12,9 @@
 	\maketitle
 
 	\paragraph{Question 1}
+	The component diagram can be found as figure \ref{fig:component}. We show every component in a `component'-box, along with relevant class objects in yellow boxes. The half open circles and full circle arrows indicate required and offered interfaces respectively.
+	
+	The front-end exists of the computer of the customer, which can be seen on the left hand side of the diagram. The back end consists of the Google cloud platform on one hand, and the Theatre servers on the other hand.
 	\paragraph{Question 2} 
 	We've made use of the Spring boot API to be able to simply create an endpoint te receive the messages of our Google Pub/Sub implementation. For this scenario, we could simply add the \texttt{@RestController} annotation and provide the code which corresponds to this endpoint. The specific behaviour of receiving POST-requests can then be added by providing the method with an \texttt{@PostMapping} annotation.
 	
@@ -60,5 +64,14 @@
 	\clearpage
 	
 	% You can include diagrams here.
+	
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=\linewidth]{../diagrams/ComponentDiagram}
+		\end{center}
+	\caption{Component diagram of part I of the project.}
+	\label{fig:component}
+	\end{figure}
+
 	
 \end{document}
