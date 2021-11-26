@@ -36,7 +36,6 @@ public class PubSubController {
     }
 
     // https://cloud.google.com/pubsub/docs/troubleshooting#messages
-    // <- Google documentatie is officieel poep
     @PostMapping("/push")
     public ResponseEntity<Void> confirmQuote(@RequestBody String message) throws ParseException {
         String customer;
