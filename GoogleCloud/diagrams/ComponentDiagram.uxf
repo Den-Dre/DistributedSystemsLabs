@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="13.3">
-  <zoom_level>16</zoom_level>
+  <zoom_level>20</zoom_level>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1104</x>
-      <y>896</y>
-      <w>144</w>
-      <h>64</h>
+      <x>1100</x>
+      <y>940</y>
+      <w>180</w>
+      <h>80</h>
     </coordinates>
     <panel_attributes>Model
 halign=center
@@ -19,10 +19,10 @@ layer=2</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>848</x>
-      <y>704</y>
-      <w>208</w>
-      <h>64</h>
+      <x>780</x>
+      <y>700</y>
+      <w>260</w>
+      <h>80</h>
     </coordinates>
     <panel_attributes>View Controller
 halign=center
@@ -35,9 +35,9 @@ layer=2</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>1120</x>
-      <y>704</y>
-      <w>192</w>
-      <h>64</h>
+      <y>700</y>
+      <w>240</w>
+      <h>80</h>
     </coordinates>
     <panel_attributes>APIController
 halign=center
@@ -49,10 +49,10 @@ layer=2</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>816</x>
-      <y>864</y>
-      <w>256</w>
-      <h>112</h>
+      <x>740</x>
+      <y>900</y>
+      <w>320</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>
 symbol=component
@@ -65,10 +65,10 @@ Pub/Sub Controller
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>816</x>
-      <y>624</y>
-      <w>528</w>
-      <h>208</h>
+      <x>740</x>
+      <y>600</y>
+      <w>660</w>
+      <h>260</h>
     </coordinates>
     <panel_attributes>symbol=component
 Endpoint</panel_attributes>
@@ -77,10 +77,10 @@ Endpoint</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>640</x>
-      <y>736</y>
-      <w>96</w>
-      <h>80</h>
+      <x>520</x>
+      <y>740</y>
+      <w>120</w>
+      <h>100</h>
     </coordinates>
     <panel_attributes>lt=)-</panel_attributes>
     <additional_attributes>30.0;20.0;10.0;20.0</additional_attributes>
@@ -88,10 +88,10 @@ Endpoint</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>704</x>
-      <y>752</y>
-      <w>144</w>
-      <h>48</h>
+      <x>600</x>
+      <y>760</y>
+      <w>180</w>
+      <h>60</h>
     </coordinates>
     <panel_attributes>lt=()-</panel_attributes>
     <additional_attributes>10.0;10.0;70.0;10.0</additional_attributes>
@@ -99,10 +99,10 @@ Endpoint</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>256</x>
-      <y>672</y>
-      <w>384</w>
-      <h>192</h>
+      <x>40</x>
+      <y>660</y>
+      <w>480</w>
+      <h>240</h>
     </coordinates>
     <panel_attributes>symbol=component
 Customer PC
@@ -114,10 +114,10 @@ Runs HTML, CSS, JavaScript</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>224</x>
-      <y>608</y>
-      <w>432</w>
-      <h>304</h>
+      <x>0</x>
+      <y>580</y>
+      <w>540</w>
+      <h>380</h>
     </coordinates>
     <panel_attributes>Front end
 --
@@ -129,10 +129,10 @@ layer=1</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>752</x>
-      <y>224</y>
-      <w>1168</w>
-      <h>1088</h>
+      <x>660</x>
+      <y>100</y>
+      <w>1460</w>
+      <h>1360</h>
     </coordinates>
     <panel_attributes>Google Cloud Platform
 --
@@ -144,10 +144,10 @@ layer=0</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>784</x>
-      <y>576</y>
-      <w>704</w>
-      <h>448</h>
+      <x>700</x>
+      <y>540</y>
+      <w>880</w>
+      <h>560</h>
     </coordinates>
     <panel_attributes>symbol=component
 Spring Boot Server (1 to many)</panel_attributes>
@@ -156,24 +156,25 @@ Spring Boot Server (1 to many)</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>784</x>
-      <y>1104</y>
-      <w>480</w>
-      <h>176</h>
+      <x>700</x>
+      <y>1200</y>
+      <w>600</w>
+      <h>240</h>
     </coordinates>
     <panel_attributes>symbol=component
 Pub/Sub
 Consists of one or multiple servers
+based on current load
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>928</x>
-      <y>1200</y>
-      <w>192</w>
-      <h>64</h>
+      <x>880</x>
+      <y>1340</y>
+      <w>240</w>
+      <h>80</h>
     </coordinates>
     <panel_attributes>JWT Message
 halign=center
@@ -185,22 +186,22 @@ layer=2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1232</x>
-      <y>912</y>
-      <w>208</w>
-      <h>320</h>
+      <x>1180</x>
+      <y>1000</y>
+      <w>180</w>
+      <h>240</h>
     </coordinates>
     <panel_attributes>lt=[&gt;]-[&gt;]
 Publishes</panel_attributes>
-    <additional_attributes>10.0;10.0;50.0;10.0;50.0;180.0;20.0;180.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>848</x>
-      <y>960</y>
-      <w>48</w>
-      <h>112</h>
+      <x>780</x>
+      <y>1020</y>
+      <w>60</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>lt=()-</panel_attributes>
     <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
@@ -208,10 +209,10 @@ Publishes</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>832</x>
-      <y>1040</y>
-      <w>80</w>
-      <h>96</h>
+      <x>760</x>
+      <y>1120</y>
+      <w>100</w>
+      <h>120</h>
     </coordinates>
     <panel_attributes>lt=)-</panel_attributes>
     <additional_attributes>20.0;20.0;20.0;40.0</additional_attributes>
@@ -219,10 +220,10 @@ Publishes</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>768</x>
-      <y>528</y>
-      <w>784</w>
-      <h>512</h>
+      <x>680</x>
+      <y>480</y>
+      <w>980</w>
+      <h>660</h>
     </coordinates>
     <panel_attributes>Google App Engine
 --
@@ -234,13 +235,14 @@ layer=0</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>800</x>
-      <y>304</y>
-      <w>368</w>
-      <h>96</h>
+      <x>720</x>
+      <y>200</y>
+      <w>460</w>
+      <h>120</h>
     </coordinates>
     <panel_attributes>symbol=component
-Firebase authentication
+Firebase authentication 
+server
 
 layer=2</panel_attributes>
     <additional_attributes/>
@@ -248,10 +250,10 @@ layer=2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>608</x>
-      <y>336</y>
-      <w>224</w>
-      <h>128</h>
+      <x>480</x>
+      <y>240</y>
+      <w>280</w>
+      <h>160</h>
     </coordinates>
     <panel_attributes>lt=()-</panel_attributes>
     <additional_attributes>10.0;60.0;10.0;10.0;120.0;10.0</additional_attributes>
@@ -259,10 +261,10 @@ layer=2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>592</x>
-      <y>432</y>
-      <w>80</w>
-      <h>240</h>
+      <x>460</x>
+      <y>360</y>
+      <w>100</w>
+      <h>300</h>
     </coordinates>
     <panel_attributes>lt=)-</panel_attributes>
     <additional_attributes>20.0;20.0;20.0;130.0</additional_attributes>
@@ -270,10 +272,10 @@ layer=2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>960</x>
-      <y>384</y>
-      <w>48</w>
-      <h>96</h>
+      <x>920</x>
+      <y>300</y>
+      <w>60</w>
+      <h>120</h>
     </coordinates>
     <panel_attributes>lt=()-</panel_attributes>
     <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
@@ -281,10 +283,10 @@ layer=2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>944</x>
-      <y>448</y>
-      <w>80</w>
-      <h>112</h>
+      <x>900</x>
+      <y>380</y>
+      <w>100</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>lt=)-</panel_attributes>
     <additional_attributes>20.0;20.0;20.0;50.0</additional_attributes>
@@ -292,10 +294,10 @@ layer=2</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>752</x>
-      <y>1376</y>
-      <w>1168</w>
-      <h>288</h>
+      <x>660</x>
+      <y>1540</y>
+      <w>1460</w>
+      <h>360</h>
     </coordinates>
     <panel_attributes>Theatre Company servers
 --
@@ -307,36 +309,39 @@ layer=0</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1184</x>
-      <y>1456</y>
-      <w>320</w>
-      <h>160</h>
+      <x>1200</x>
+      <y>1640</y>
+      <w>400</w>
+      <h>200</h>
     </coordinates>
     <panel_attributes>symbol=component
-Unreliable Theatre
+Unreliable Theatre 
+server
+
 layer=2</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>800</x>
-      <y>1456</y>
-      <w>320</w>
-      <h>160</h>
+      <x>720</x>
+      <y>1640</y>
+      <w>400</w>
+      <h>200</h>
     </coordinates>
     <panel_attributes>symbol=component
-Reliable Theatre
+Reliable Theatre 
+server
 layer=2</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>656</x>
-      <y>1344</y>
-      <w>176</w>
-      <h>208</h>
+      <x>540</x>
+      <y>1500</y>
+      <w>220</w>
+      <h>260</h>
     </coordinates>
     <panel_attributes>lt=)-</panel_attributes>
     <additional_attributes>20.0;20.0;20.0;110.0;90.0;110.0</additional_attributes>
@@ -344,10 +349,10 @@ layer=2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1280</x>
-      <y>1328</y>
-      <w>80</w>
-      <h>160</h>
+      <x>1320</x>
+      <y>1480</y>
+      <w>100</w>
+      <h>200</h>
     </coordinates>
     <panel_attributes>lt=)-</panel_attributes>
     <additional_attributes>20.0;20.0;20.0;80.0</additional_attributes>
@@ -355,10 +360,10 @@ layer=2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>672</x>
-      <y>1200</y>
-      <w>144</w>
-      <h>176</h>
+      <x>560</x>
+      <y>1320</y>
+      <w>180</w>
+      <h>220</h>
     </coordinates>
     <panel_attributes>lt=()-</panel_attributes>
     <additional_attributes>10.0;90.0;10.0;10.0;70.0;10.0</additional_attributes>
@@ -366,10 +371,10 @@ layer=2</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1248</x>
-      <y>1232</y>
-      <w>96</w>
-      <h>128</h>
+      <x>1280</x>
+      <y>1360</y>
+      <w>120</w>
+      <h>160</h>
     </coordinates>
     <panel_attributes>lt=()-</panel_attributes>
     <additional_attributes>40.0;60.0;40.0;10.0;10.0;10.0</additional_attributes>
@@ -377,10 +382,10 @@ layer=2</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>736</x>
-      <y>144</y>
-      <w>1328</w>
-      <h>1552</h>
+      <x>640</x>
+      <y>0</y>
+      <w>1660</w>
+      <h>1940</h>
     </coordinates>
     <panel_attributes>Back end
 --
@@ -388,5 +393,28 @@ fg=blue
 bg=white
 layer=0</panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1260</x>
+      <y>980</y>
+      <w>200</w>
+      <h>700</h>
+    </coordinates>
+    <panel_attributes>lt=[&gt;]-[&gt;]</panel_attributes>
+    <additional_attributes>10.0;10.0;80.0;10.0;80.0;330.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>860</x>
+      <y>940</y>
+      <w>960</w>
+      <h>1020</h>
+    </coordinates>
+    <panel_attributes>lt=[&gt;]-[&gt;]
+layer=2</panel_attributes>
+    <additional_attributes>210.0;10.0;460.0;10.0;460.0;490.0;10.0;490.0;10.0;450.0</additional_attributes>
   </element>
 </diagram>
