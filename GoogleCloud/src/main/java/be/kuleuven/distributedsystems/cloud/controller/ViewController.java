@@ -152,8 +152,6 @@ public class ViewController {
             @CookieValue(value = "cart", required = false) String cartString) throws Exception {
         // TODO: limit this function to managers
 
-        System.out.println("managerpage!!");
-
         if (!AuthController.getUser().isManager())
             throw new AccessDeniedException("no manager");
 

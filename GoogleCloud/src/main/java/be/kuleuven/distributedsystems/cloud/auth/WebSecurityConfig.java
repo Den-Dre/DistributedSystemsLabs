@@ -28,7 +28,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/authenticate", "/logout", "/js/**", "/css/**", "/images/**").permitAll()
-                .antMatchers("/_ah/**").permitAll()
+                .antMatchers("/_ah/**", "/push").permitAll() //TODO  <-- pubsub endpoint moet je hier ook specifieren!!
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()

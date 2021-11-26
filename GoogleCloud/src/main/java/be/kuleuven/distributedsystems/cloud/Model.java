@@ -1,19 +1,14 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
-import com.google.api.core.ApiFuture;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.grpc.GrpcTransportChannel;
 import com.google.api.gax.rpc.FixedTransportChannelProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
-import com.google.cloud.ByteArray;
 import com.google.cloud.pubsub.v1.Publisher;
-import com.google.cloud.pubsub.v1.TopicAdminClient;
-import com.google.cloud.pubsub.v1.TopicAdminSettings;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
-import com.google.pubsub.v1.Topic;
 import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -21,19 +16,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
+import org.springframework.util.SerializationUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
 public class Model {
+
+    private static final int RETRY_DELAY = 1000;
 
     @Autowired
     private final WebClient.Builder builder = WebClient.builder();
@@ -46,11 +41,18 @@ public class Model {
     private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
 
 
+    public void addBestCustomer(String customer, ArrayList<Ticket> tickets) {
+        if (bestCustomersList.containsKey(customer))
+            bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
+        else
+            bestCustomersList.put(customer, tickets.size());
+    }
+
     /**
      * Add the given booking to the list of kept bookings.
      * @param booking: the {@link Booking} to be added.
      */
-    private void addBooking(Booking booking) {
+    public void addBooking(Booking booking) {
         bookings.add(booking);
     }
 
@@ -59,7 +61,7 @@ public class Model {
      *
      * @return A List of {@link Show} objects.
      */
-    public List<Show> getShows() {
+    public List<Show> getShows()  {
         var shows = builder
                             .baseUrl("https://reliabletheatrecompany.com/")
                             .build()
@@ -72,8 +74,40 @@ public class Model {
                             .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
                             .block()
                             .getContent();
+        boolean succes = false;
+        Collection<Show>shows2 = null;
+        while (!succes) {
+            try {
+                shows2 = builder
+                        .baseUrl("https://unreliabletheatrecompany.com/")
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows")
+                                .queryParam("key", API_KEY)
+                                .build())
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
+                        .block()
+                        .getContent();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
 
-        return List.copyOf(shows);
+            }
+        }
+
+
+        List<Show> allShows = new ArrayList<>();
+        allShows.addAll(shows);
+        allShows.addAll(shows2);
+
+        return allShows;
     }
 
     /**
@@ -84,17 +118,33 @@ public class Model {
      * @return A {@link Show} object.
      */
     public Show getShow(String company, UUID showId) {
-        var show = builder
-                .baseUrl("https://reliabletheatrecompany.com/")
-                .build()
-                .get()
-                .uri(builder -> builder
-                        .pathSegment("shows/{showId}")
-                        .queryParam("key", API_KEY)
-                        .build(showId.toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Show>() {})
-                .block();
+        boolean succes = false;
+        Show show = null;
+        while (!succes) {
+            try {
+                show = builder
+                        .baseUrl(String.format("https://%s/", company))
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}")
+                                .queryParam("key", API_KEY)
+                                .build(showId.toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Show>() {})
+                        .block();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
+
+            }
+        }
+
         return show;
     }
 
@@ -106,19 +156,33 @@ public class Model {
      * @return A List of {@link LocalDateTime} objects.
      */
     public List<LocalDateTime> getShowTimes(String company, UUID showId) {
-        var times = builder
-                .baseUrl("https://reliabletheatrecompany.com/")
-                .build()
-                .get()
-                .uri(builder -> builder
-                        .pathSegment("shows/{showId}/times")
-                        .queryParam("key", API_KEY)
-                        .build(showId.toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<CollectionModel<LocalDateTime>>() {})
-                .block()
-                .getContent();
-        // System.out.println(times);
+        boolean succes = false;
+        Collection<LocalDateTime> times  = null;
+        while (!succes) {
+            try {
+                times = builder
+                        .baseUrl(String.format("https://%s/", company))
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}/times")
+                                .queryParam("key", API_KEY)
+                                .build(showId.toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<LocalDateTime>>() {})
+                        .block()
+                        .getContent();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
+
+            }
+        }
         return List.copyOf(times);
     }
 
@@ -131,35 +195,66 @@ public class Model {
      * @return A list of available {@link Seat} objects.
      */
     public List<Seat> getAvailableSeats(String company, UUID showId, LocalDateTime time) {
-        var seats = builder
-                .baseUrl("https://reliabletheatrecompany.com/")
-                .build()
-                .get()
-                .uri(builder -> builder
-                        .pathSegment("shows/{showId}/seats")
-                        .queryParam("key", API_KEY)
-                        .queryParam("time", time.toString())
-                        .queryParam("available", "true")
-                        .build(showId.toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<CollectionModel<Seat>>() {})
-                .block()
-                .getContent();
+        boolean succes = false;
+        Collection<Seat> seats  = null;
+        while (!succes) {
+            try {
+                seats = builder
+                        .baseUrl(String.format("https://%s/", company))
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}/seats")
+                                .queryParam("key", API_KEY)
+                                .queryParam("time", time.toString())
+                                .queryParam("available", "true")
+                                .build(showId.toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Seat>>() {})
+                        .block()
+                        .getContent();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
+
+            }
+        }
         return List.copyOf(seats);
     }
 
     public Seat getSeat(String company, UUID showId, UUID seatId) {
-        var seat = builder
-                .baseUrl("https://reliabletheatrecompany.com/")
-                .build()
-                .get()
-                .uri(builder -> builder
-                        .pathSegment("shows/{showId}/seats/{seatId}")
-                        .queryParam("key", API_KEY)
-                        .build(showId.toString(), seatId.toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Seat>() {})
-                .block();
+        boolean succes = false;
+        Seat seat  = null;
+        while (!succes) {
+            try {
+                seat = builder
+                        .baseUrl(String.format("https://%s/", company))
+                        .build()
+                        .get()
+                        .uri(builder -> builder
+                                .pathSegment("shows/{showId}/seats/{seatId}")
+                                .queryParam("key", API_KEY)
+                                .build(showId.toString(), seatId.toString()))
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Seat>() {})
+                        .block();
+                succes = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(500);
+                } catch (InterruptedException e2) {
+                    System.out.println(e2);
+                }
+
+            }
+        }
+
         return seat;
     }
 
@@ -191,7 +286,15 @@ public class Model {
      * @return bookings: a list of bookings made by the given {@code customer}
      */
     public List<Booking> getBookings(String customer) {
+        // Take the delay of the Pub Sub into account
+        try {
+            TimeUnit.MILLISECONDS.sleep(RETRY_DELAY/2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         var bookings = getAllBookings();
+        System.out.println("Current customer: " + customer);
+        bookings.forEach(b -> System.out.println("Booking x of Model.bookings: " + b.getCustomer()));
         return bookings
                 .stream()
                 .filter(b -> b.getCustomer().equals(customer))
@@ -203,6 +306,7 @@ public class Model {
      * @return bookings: a list of all made bookings
      */
     public List<Booking> getAllBookings() {
+
         return bookings;
     }
 
@@ -228,9 +332,6 @@ public class Model {
      * @param customer: The customer who has made the given {@link Quote}s
      */
     public void confirmQuotes(List<Quote> quotes, String customer) throws InterruptedException {
-        ArrayList<Ticket> tickets = quotes.stream().map(
-                q -> new Ticket(q.getCompany(), q.getShowId(), q.getSeatId(), UUID.randomUUID(), customer)
-        ).collect(Collectors.toCollection(ArrayList::new));
 
         // source https://cloud.google.com/pubsub/docs/emulator#accessing_environment_variables
         // Use localhost of emulator instead of real endpoint!
@@ -242,20 +343,7 @@ public class Model {
             TransportChannelProvider channelProvider =
                     FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
             CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
-
-            // Set the channel and credentials provider when creating a `TopicAdminClient`.
-            // Similarly for SubscriptionAdminClient
-            // TODO use this?
-
             TopicName topicName = TopicName.of("demo-distributed-systems-kul", Application.TOPIC);
-//            TopicAdminClient topicClient =
-//                    TopicAdminClient.create(
-//                            TopicAdminSettings.newBuilder()
-//                                    .setTransportChannelProvider(channelProvider)
-//                                    .setCredentialsProvider(credentialsProvider)
-//                                    .build());
-//            Topic topic = topicClient.createTopic(topicName);
-//            System.out.println("Topic toppie! " + topic.getName());
 
             // Set the channel and credentials provider when creating a `Publisher`.
             // Similarly for Subscriber
@@ -264,42 +352,12 @@ public class Model {
                     .setCredentialsProvider(credentialsProvider)
                     .build();
 
-            // #### Create message from quotes
-            // https://cloud.google.com/pubsub/docs/quickstart-client-libraries#publish_messages
-            // Serialize quotes
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(quotes);
-            byte[] bytes = bos.toByteArray();
-            ByteString data = ByteString.copyFrom(bytes);
-
-            PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
-
-            ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
-            String messageId = messageIdFuture.get();
-            System.out.println("Published message ID: " + messageId);
-
-            // TODO move this to APIController
-//            for (Quote q : quotes) {
-
-                // TODO see slides: create message, encode into data, give data to
-                // PubsubMessage.builder and publish
-
-//                var putResult = builder
-//                        .baseUrl("https://reliabletheatrecompany.com/")
-//                        .build()
-//                        .put()
-//                        .uri(builder -> builder
-//                                .pathSegment("shows/{showId}/seats/{seatId}/ticket")
-//                                .queryParam("customer", customer)
-//                                .queryParam("key", API_KEY)
-//                                .build(q.getShowId().toString(), q.getSeatId().toString()))
-//                        .retrieve()
-//                        .bodyToMono(new ParameterizedTypeReference<Ticket>() {
-//                        })
-//                        .block();
-//            }
-        } catch (IOException | ExecutionException | InterruptedException e) {
+            ArrayList<Quote> quotesArray = new ArrayList<>(quotes);
+            byte[] quotesSerialized = SerializationUtils.serialize(quotesArray);
+            ByteString data = ByteString.copyFrom(quotesSerialized);
+            PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAttributes("customer", customer).putAttributes("apiKey", API_KEY).build();
+            publisher.publish(pubsubMessage);
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             channel.shutdown();
@@ -308,12 +366,6 @@ public class Model {
                 publisher.shutdown();
                 publisher.awaitTermination(1, TimeUnit.MINUTES);
             }
-
-//            addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, customer));
-//            if (bestCustomersList.containsKey(customer))
-//                bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
-//            else
-//                bestCustomersList.put(customer, tickets.size());
         }
     }
 }

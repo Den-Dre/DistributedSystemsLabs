@@ -10,5 +10,6 @@
 /home/r0760777/Documents/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/entities/Show.java
 /home/r0760777/Documents/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/Model.java
 /home/r0760777/Documents/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/controller/APIController.java
+/home/r0760777/Documents/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/controller/PubSubController.java
 /home/r0760777/Documents/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/controller/ViewController.java
 /home/r0760777/Documents/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/entities/Ticket.java
