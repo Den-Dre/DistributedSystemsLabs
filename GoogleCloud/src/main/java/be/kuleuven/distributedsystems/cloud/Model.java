@@ -363,9 +363,8 @@ public class Model {
             ByteString data = ByteString.copyFrom(quotesSerialized);
             System.out.println(quotesSerialized.toString());
             PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAttributes("customer", customer).putAttributes("apiKey", API_KEY).build();
-            ApiFuture<String> apiFuture = publisher.publish(pubsubMessage);
-            System.out.println("sent message with id:" + apiFuture.get());
             // if we don't add this .get(), the finally clause gets executed before the message is sent: apiFuture.get() is a blocking call!
+            publisher.publish(pubsubMessage).get();
         } catch (IOException | ExecutionException e) {
             e.printStackTrace();
         } finally {
