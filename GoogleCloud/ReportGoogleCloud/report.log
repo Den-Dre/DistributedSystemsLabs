@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.3.14)  26 NOV 2021 10:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.3.14)  26 NOV 2021 17:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -219,8 +219,8 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 1
-9.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 2
+1.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
@@ -232,19 +232,19 @@ Package microtype Info: Loading generic protrusion settings for font family
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
-<../diagrams/ComponentDiagram.png, id=18, 1194.4625pt x 1013.7875pt>
+<../diagrams/ComponentDiagram.png, id=18, 1194.4625pt x 1023.825pt>
 File: ../diagrams/ComponentDiagram.png Graphic file (type png)
 <use ../diagrams/ComponentDiagram.png>
 Package pdftex.def Info: ../diagrams/ComponentDiagram.png  used on input line 7
-0.
-(pdftex.def)             Requested size: 424.58624pt x 360.3689pt.
+2.
+(pdftex.def)             Requested size: 424.58624pt x 363.93689pt.
  [3 <../diagrams/ComponentDiagram.png (PNG copy)>] (./report.aux) ) 
 Here is how much of TeX's memory you used:
- 4421 strings out of 481239
- 70950 string characters out of 5920377
- 353946 words of memory out of 5000000
+ 4423 strings out of 481239
+ 70972 string characters out of 5920377
+ 354946 words of memory out of 5000000
  19582 multiletter control sequences out of 15000+600000
- 539835 words of font info for 60 fonts, out of 8000000 for 9000
+ 539893 words of font info for 61 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  41i,6n,46p,879b,267s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/
@@ -256,7 +256,7 @@ blic/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm24
 88.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1200.pfb></usr/share/t
 exmf/fonts/type1/public/cm-super/sfti2488.pfb></usr/share/texmf/fonts/type1/pub
 lic/cm-super/sftt1000.pfb>
-Output written on report.pdf (3 pages, 199846 bytes).
+Output written on report.pdf (3 pages, 203425 bytes).
 PDF statistics:
  51 PDF objects out of 1000 (max. 8388607)
  36 compressed objects within 1 object stream

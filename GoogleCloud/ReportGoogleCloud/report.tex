@@ -1,5 +1,5 @@
 \documentclass{ds-report} 
-\usepackage{babel}[dutch]
+\usepackage{babel}[english]
 \usepackage{graphicx}
 
 \assignment{Project} % Set to `Remote communication` or `Project`.
@@ -12,9 +12,11 @@
 	\maketitle
 
 	\paragraph{Question 1}
-	The component diagram can be found as figure \ref{fig:component}. We show every component in a `component'-box, along with relevant class objects in yellow boxes. The half open circles and full circle arrows indicate required and offered interfaces respectively.
+	The component diagram can be found as figure \ref{fig:component}. We show every component in a `component'-box, along with relevant class objects/concepts in yellow boxes. The half open circles and full circle arrows indicate required and offered interfaces respectively.
 	
-	The front-end exists of the computer of the customer, which can be seen on the left hand side of the diagram. The back end consists of the Google cloud platform on one hand, and the Theatre servers on the other hand.
+	The front-end exists of the computer of the customer, which can be seen on the left hand side of the diagram. The back end consists of the Google cloud Component platform on one hand, and the Theatre servers on the other hand.
+	
+	The front-end makes use of the interface offered by the Spring boot server. Within the back-end, the firebase authentication server offers an interface both to the frond-end and the Spring boot server endpoints to decouple the authentication of users. Within the Google App engine we also make use of a Pub/Sub server whose job is to delegate JWT messages from the Model to the theatre company servers, when it comes to confirming quotes. Other HTTP-requests are sent directly form the Model class to the company servers. This Pub/Sub server makes use of the endpoint made available in the Pub/Sub-controller's interface.
 	\paragraph{Question 2} 
 	We've made use of the Spring boot API to be able to simply create an endpoint te receive the messages of our Google Pub/Sub implementation. For this scenario, we could simply add the \texttt{@RestController} annotation and provide the code which corresponds to this endpoint. The specific behaviour of receiving POST-requests can then be added by providing the method with an \texttt{@PostMapping} annotation.
 	
