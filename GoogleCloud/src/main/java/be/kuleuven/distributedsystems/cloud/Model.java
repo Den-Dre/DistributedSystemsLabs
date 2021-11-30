@@ -1,11 +1,13 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
+import com.google.api.core.ApiFuture;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.grpc.GrpcTransportChannel;
 import com.google.api.gax.rpc.FixedTransportChannelProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
+import com.google.cloud.firestore.Firestore;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
@@ -22,6 +24,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -118,6 +121,9 @@ public class Model {
      * @return A {@link Show} object.
      */
     public Show getShow(String company, UUID showId) {
+//        Firestore firestore = Application.getFirestore();
+//        firestore.collection("test").document("TestDocument").collection("SubTest");
+
         boolean succes = false;
         Show show = null;
         while (!succes) {
@@ -355,9 +361,12 @@ public class Model {
             ArrayList<Quote> quotesArray = new ArrayList<>(quotes);
             byte[] quotesSerialized = SerializationUtils.serialize(quotesArray);
             ByteString data = ByteString.copyFrom(quotesSerialized);
+            System.out.println(quotesSerialized.toString());
             PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAttributes("customer", customer).putAttributes("apiKey", API_KEY).build();
-            publisher.publish(pubsubMessage);
-        } catch (IOException e) {
+            ApiFuture<String> apiFuture = publisher.publish(pubsubMessage);
+            System.out.println("sent message with id:" + apiFuture.get());
+            // if we don't add this .get(), the finally clause gets executed before the message is sent: apiFuture.get() is a blocking call!
+        } catch (IOException | ExecutionException e) {
             e.printStackTrace();
         } finally {
             channel.shutdown();

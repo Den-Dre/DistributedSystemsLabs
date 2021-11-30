@@ -38,6 +38,7 @@ public class PubSubController {
     // https://cloud.google.com/pubsub/docs/troubleshooting#messages
     @PostMapping("/push")
     public ResponseEntity<Void> confirmQuote(@RequestBody String message) throws ParseException {
+        System.out.println("In confirmQuote");
         String customer;
         ArrayList<Quote> quotes;
         ArrayList<Ticket> successfulTicketIDs = new ArrayList<>();
