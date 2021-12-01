@@ -49,17 +49,7 @@ public class Application {
 //                .setCredentialsProvider(FixedCredentialsProvider.create(new FirestoreOptions.EmulatorCredentials()))
 //                .build()
 //                .getService();
-        // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
-        firestore = FirestoreOptions.newBuilder()
-                .setProjectId("demo-distributed-systems-kul")
-                .setChannelProvider(
-                        InstantiatingGrpcChannelProvider.newBuilder().setEndpoint("localhost:8084")
-                                .setChannelConfigurator(
-                                        ManagedChannelBuilder::usePlaintext
-                                ).build())
-                .setCredentialsProvider(FixedCredentialsProvider.create(new FakeCreds()))
-                .build()
-                .getService();
+
         // Start Spring Boot application
         ApplicationContext context = SpringApplication.run(Application.class, args);
     }
@@ -126,9 +116,19 @@ public class Application {
         return firewall;
     }
 
-    // @Bean
-    public static Firestore getFirestore() {
-        return firestore;
+    @Bean
+    public static Firestore db() {
+        // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
+        return FirestoreOptions.newBuilder()
+                .setProjectId("demo-distributed-systems-kul")
+                .setChannelProvider(
+                        InstantiatingGrpcChannelProvider.newBuilder().setEndpoint("localhost:8084")
+                                .setChannelConfigurator(
+                                        ManagedChannelBuilder::usePlaintext
+                                ).build())
+                .setCredentialsProvider(FixedCredentialsProvider.create(new FakeCreds()))
+                .build()
+                .getService();
     }
 
 }

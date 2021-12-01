@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -34,6 +35,9 @@ public class PubSubController {
 
     @Autowired
     private final WebClient.Builder builder = WebClient.builder();
+
+    @Resource(name = "db")
+    private Firestore db;
 
     @Autowired
     public PubSubController(Model model) {
@@ -103,8 +107,7 @@ public class PubSubController {
       * @param booking: the {@link Booking} to be added.
       */
     public void addBooking(Booking booking) {
-        Firestore firestore = Application.getFirestore();
-        ApiFuture<WriteResult> future = firestore.collection("Bookings").document("booking_" + booking.getId()).set(booking);
+        ApiFuture<WriteResult> future = db.collection("Bookings").document("booking_" + booking.getId()).set(booking);
         try {
             System.out.println("Update time : " + future.get().getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {

@@ -28,7 +28,6 @@ public class SecurityFilter extends OncePerRequestFilter {
         var session = WebUtils.getCookie(request, "session");
         User user;
         if (session != null) {
-
             try {
                 DecodedJWT jwt = JWT.decode(session.getValue());
                 String role = jwt.getClaim("role").asString();

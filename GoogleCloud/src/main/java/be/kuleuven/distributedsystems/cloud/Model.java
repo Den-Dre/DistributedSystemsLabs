@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -41,6 +42,9 @@ public class Model {
 
     private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
+    @Resource(name = "db")
+    private Firestore db;
+
     private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
 
     public void addBestCustomer(String customer, ArrayList<Ticket> tickets) {
@@ -57,8 +61,7 @@ public class Model {
     // TODO remove this?
     @Deprecated
     public void addBooking(Booking booking) {
-        Firestore firestore = Application.getFirestore();
-        ApiFuture<WriteResult> future = firestore.collection("Bookings").document("booking_" + booking.getId()).set(booking);
+        ApiFuture<WriteResult> future = db.collection("Bookings").document("booking_" + booking.getId()).set(booking);
         try {
             System.out.println("Update time : " + future.get().getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
@@ -318,13 +321,12 @@ public class Model {
      */
     @SuppressWarnings("unchecked")
     public List<Booking> getAllBookings() {
-        Firestore firestore = Application.getFirestore();
-        CollectionReference reference = firestore.collection("Bookings");
+        CollectionReference reference = db.collection("Bookings");
         System.out.println("Get all bookings: ");
         reference.listDocuments().forEach(System.out::println);
         QuerySnapshot snapshot = null;
         try {
-            snapshot = firestore.collection("Bookings").get().get();
+            snapshot = db.collection("Bookings").get().get();
 
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
