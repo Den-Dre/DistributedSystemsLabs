@@ -1,11 +1,14 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.api.gax.grpc.InstantiatingGrpcChannelProvider;
+import com.google.auth.Credentials;
 import com.google.cloud.ServiceOptions;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 import com.google.cloud.firestore.v1.FirestoreClient;
 import com.google.cloud.firestore.v1.FirestoreSettings;
+import io.grpc.ManagedChannelBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -19,12 +22,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @SpringBootApplication
 public class Application {
     public static final String TOPIC = "ABCDEFGH";
+    public static Firestore firestore;
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
@@ -34,9 +42,59 @@ public class Application {
         // Apache JSP scans by default all JARs, which is not necessary, so disable it
         System.setProperty(org.apache.tomcat.util.scan.Constants.SKIP_JARS_PROPERTY, "*.jar");
         System.setProperty(org.apache.tomcat.util.scan.Constants.SCAN_JARS_PROPERTY, "taglibs-standard-spec-*.jar,taglibs-standard-impl-*.jar");
-
+//        firestore = FirestoreOptions.getDefaultInstance().toBuilder()
+//                .setProjectId("demo-distributed-systems-kul")
+//                .setHost("localhost:8084")
+//                .setCredentials(new FirestoreOptions.EmulatorCredentials())
+//                .setCredentialsProvider(FixedCredentialsProvider.create(new FirestoreOptions.EmulatorCredentials()))
+//                .build()
+//                .getService();
+        // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
+        firestore = FirestoreOptions.newBuilder()
+                .setProjectId("demo-distributed-systems-kul")
+                .setChannelProvider(
+                        InstantiatingGrpcChannelProvider.newBuilder().setEndpoint("localhost:8084")
+                                .setChannelConfigurator(
+                                        ManagedChannelBuilder::usePlaintext
+                                ).build())
+                .setCredentialsProvider(FixedCredentialsProvider.create(new FakeCreds()))
+                .build()
+                .getService();
         // Start Spring Boot application
         ApplicationContext context = SpringApplication.run(Application.class, args);
+    }
+
+    private static class FakeCreds extends Credentials {
+        final Map<String, List<String>> HEADERS = new HashMap<>();
+
+        public FakeCreds() {
+            HEADERS.put("Authorization", List.of(new String[]{"Bearer Owner"}));
+        }
+
+        @Override
+        public String getAuthenticationType() {
+            return null;
+        }
+
+        @Override
+        public Map<String, List<String>> getRequestMetadata(URI uri) throws IOException {
+            return HEADERS;
+        }
+
+        @Override
+        public boolean hasRequestMetadata() {
+            return true;
+        }
+
+        @Override
+        public boolean hasRequestMetadataOnly() {
+            return true;
+        }
+
+        @Override
+        public void refresh() throws IOException {
+
+        }
     }
 
 //    public FirestoreOptions.Builder setEmulatorHost(String emulatorHost) {}
@@ -68,15 +126,8 @@ public class Application {
         return firewall;
     }
 
-//    @Bean
-    static Firestore getFirestore() {
-        Firestore firestore = FirestoreOptions.getDefaultInstance().toBuilder()
-                .setProjectId("demo-distributed-systems-kul")
-                .setHost("localhost:8084")
-                .setCredentials(new FirestoreOptions.EmulatorCredentials())
-                .setCredentialsProvider(FixedCredentialsProvider.create(new FirestoreOptions.EmulatorCredentials()))
-                .build()
-                .getService();
+    // @Bean
+    public static Firestore getFirestore() {
         return firestore;
     }
 

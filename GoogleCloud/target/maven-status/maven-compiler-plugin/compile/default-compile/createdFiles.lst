@@ -17,6 +17,7 @@ be/kuleuven/distributedsystems/cloud/entities/Seat.class
 be/kuleuven/distributedsystems/cloud/entities/Booking.class
 be/kuleuven/distributedsystems/cloud/Model$2.class
 be/kuleuven/distributedsystems/cloud/controller/ViewController.class
+be/kuleuven/distributedsystems/cloud/Application$FakeCreds.class
 be/kuleuven/distributedsystems/cloud/entities/Quote.class
 be/kuleuven/distributedsystems/cloud/Model$1.class
 be/kuleuven/distributedsystems/cloud/entities/User.class
