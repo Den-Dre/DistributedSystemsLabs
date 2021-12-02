@@ -1,9 +1,13 @@
 package be.kuleuven.distributedsystems.cloud.controller;
 
+import be.kuleuven.distributedsystems.cloud.Application;
 import be.kuleuven.distributedsystems.cloud.Model;
 import be.kuleuven.distributedsystems.cloud.entities.Booking;
 import be.kuleuven.distributedsystems.cloud.entities.Quote;
 import be.kuleuven.distributedsystems.cloud.entities.Ticket;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.WriteResult;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minidev.json.parser.ParseException;
@@ -17,10 +21,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,6 +36,9 @@ public class PubSubController {
     @Autowired
     private final WebClient.Builder builder = WebClient.builder();
 
+    @Resource(name = "db")
+    private Firestore db;
+
     @Autowired
     public PubSubController(Model model) {
         this.model = model;
@@ -38,6 +47,7 @@ public class PubSubController {
     // https://cloud.google.com/pubsub/docs/troubleshooting#messages
     @PostMapping("/push")
     public ResponseEntity<Void> confirmQuote(@RequestBody String message) throws ParseException {
+        System.out.println("In confirmQuote");
         String customer;
         ArrayList<Quote> quotes;
         ArrayList<Ticket> successfulTicketIDs = new ArrayList<>();
@@ -56,11 +66,11 @@ public class PubSubController {
             byte[] data = Base64.getDecoder().decode(quotesString);
             quotes = (ArrayList<Quote>) SerializationUtils.deserialize(data);
 
+            String finalCustomer = customer.replaceAll("\"", "");
             for (Quote q : quotes) {
                  // PubsubMessage.builder and publish
-                String finalCustomer = customer.replaceAll("\"", "");
                 String finalAPI_KEY = API_KEY;
-                System.out.println(q.getSeatId());
+                System.out.println("SeatId in confirmQuote(): " + q.getSeatId());
                 var ticket = builder
                         .baseUrl(String.format("https://%s/", q.getCompany()))
                         .build()
@@ -76,13 +86,13 @@ public class PubSubController {
                         .block();
 
                 successfulTicketIDs.add(ticket);
-
-                ArrayList<Ticket> tickets = quotes.stream().map(
-                        quote -> new Ticket(quote.getCompany(), quote.getShowId(), quote.getSeatId(), UUID.randomUUID(), finalCustomer)
-                ).collect(Collectors.toCollection(ArrayList::new));
-                this.model.addBestCustomer(customer, tickets);
-                this.model.addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, finalCustomer));
             }
+            ArrayList<Ticket> tickets = quotes.stream().map(
+                    quote -> new Ticket(quote.getCompany(), quote.getShowId(), quote.getSeatId(), UUID.randomUUID(), finalCustomer)
+            ).collect(Collectors.toCollection(ArrayList::new));
+            // TODO decouple from Model?
+            this.model.addBestCustomer(customer, tickets);
+            addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, finalCustomer));
 
         } catch (Exception e) {
             // Prevent duplicate bookings
@@ -90,6 +100,19 @@ public class PubSubController {
             undoBookings(successfulTicketIDs, API_KEY);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+     /**
+      * Add the given booking to the list of kept bookings.
+      * @param booking: the {@link Booking} to be added.
+      */
+    public void addBooking(Booking booking) {
+        ApiFuture<WriteResult> future = db.collection("Bookings").document("booking_" + booking.getId()).set(booking);
+        try {
+            System.out.println("Update time : " + future.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     // Remove made bookings due to a duplicate booking being present in the list

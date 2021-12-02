@@ -1,29 +1,36 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
+import com.google.api.core.ApiFuture;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.grpc.GrpcTransportChannel;
 import com.google.api.gax.rpc.FixedTransportChannelProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
+import com.google.cloud.firestore.*;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class Model {
@@ -35,11 +42,10 @@ public class Model {
 
     private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
-    // We may assume there's only one active booking at once: this is allowed to be stored in memory
-    private final ArrayList<Booking> bookings = new ArrayList<>();
+    @Resource(name = "db")
+    private Firestore db;
 
     private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
-
 
     public void addBestCustomer(String customer, ArrayList<Ticket> tickets) {
         if (bestCustomersList.containsKey(customer))
@@ -52,8 +58,15 @@ public class Model {
      * Add the given booking to the list of kept bookings.
      * @param booking: the {@link Booking} to be added.
      */
+    // TODO remove this?
+    @Deprecated
     public void addBooking(Booking booking) {
-        bookings.add(booking);
+        ApiFuture<WriteResult> future = db.collection("Bookings").document("booking_" + booking.getId()).set(booking);
+        try {
+            System.out.println("Update time : " + future.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -118,6 +131,7 @@ public class Model {
      * @return A {@link Show} object.
      */
     public Show getShow(String company, UUID showId) {
+
         boolean succes = false;
         Show show = null;
         while (!succes) {
@@ -305,9 +319,59 @@ public class Model {
      * Return all bookings that have been made up until now.
      * @return bookings: a list of all made bookings
      */
+    @SuppressWarnings("unchecked")
     public List<Booking> getAllBookings() {
+        CollectionReference reference = db.collection("Bookings");
+        System.out.println("Get all bookings: ");
+        reference.listDocuments().forEach(System.out::println);
+        QuerySnapshot snapshot = null;
+        try {
+            snapshot = db.collection("Bookings").get().get();
 
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        assert snapshot != null;
+        List<Booking> bookings = new ArrayList<>();
+        for (QueryDocumentSnapshot snap : snapshot.getDocuments()) {
+            System.out.println("Customer from snapshot" + snap.get("customer"));
+            UUID id = mapToUUID(snap.get("id"));
+            Map<String, Object> timesnap = (Map<String, Object>) snap.get("time");
+            LocalDateTime time = LocalDateTime.of(
+                    Math.toIntExact((long) timesnap.get("year")),
+                    Math.toIntExact((long) timesnap.get("monthValue")),
+                    Math.toIntExact((long) timesnap.get("dayOfMonth")),
+                    Math.toIntExact((long) timesnap.get("hour")),
+                    Math.toIntExact((long) timesnap.get("minute")),
+                    Math.toIntExact((long) timesnap.get("second")),
+                    Math.toIntExact((long) timesnap.get("nano"))
+                    );
+            ArrayList<Ticket> tickets = new ArrayList<>();
+            for (Map<String, Object> map : (ArrayList<Map<String, Object>>) Objects.requireNonNull(snap.get("tickets"))) {
+                map.entrySet().forEach(System.out::println);
+                String company = (String) map.get("company");
+                String customer = (String) map.get("customer");
+                UUID seatId = mapToUUID(map.get("seatId"));
+                UUID showId = mapToUUID(map.get("showId"));
+                UUID ticketId = mapToUUID(map.get("ticketId"));
+                tickets.add(new Ticket(company, showId, seatId, ticketId, customer));
+            }
+
+            String customer = (String) snap.get("customer");
+            bookings.add(new Booking(id, time, tickets, customer));
+        }
         return bookings;
+    }
+
+    @SuppressWarnings("unchecked")
+    private UUID mapToUUID(Object map) {
+        System.out.println("Received map in mapToUUID: " + map);
+        Map<String, Long> castMap = (Map<String, Long>) map;
+        castMap.entrySet().forEach(System.out::println);
+        return new UUID(
+                castMap.get("mostSignificantBits"),
+                castMap.get("leastSignificantBits")
+        );
     }
 
     public Set<String> getBestCustomers() {
@@ -355,9 +419,11 @@ public class Model {
             ArrayList<Quote> quotesArray = new ArrayList<>(quotes);
             byte[] quotesSerialized = SerializationUtils.serialize(quotesArray);
             ByteString data = ByteString.copyFrom(quotesSerialized);
+            System.out.println("Quote of ticket: " + quotesSerialized.toString());
             PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAttributes("customer", customer).putAttributes("apiKey", API_KEY).build();
-            publisher.publish(pubsubMessage);
-        } catch (IOException e) {
+            // if we don't add this .get(), the finally clause gets executed before the message is sent: apiFuture.get() is a blocking call!
+            publisher.publish(pubsubMessage).get();
+        } catch (IOException | ExecutionException e) {
             e.printStackTrace();
         } finally {
             channel.shutdown();

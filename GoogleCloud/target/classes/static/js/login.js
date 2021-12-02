@@ -6,7 +6,14 @@ if (location.hostname === "localhost") {
     }
 } else {
     // TODO: (level 2) replace with your own configuration
-    firebaseConfig = {}
+    firebaseConfig = {
+        apiKey: "AIzaSyBbfO9SfQbkTaJB5pg-74DPrBkt6nIApgE",
+        authDomain: "distributedsystemspart2.firebaseapp.com",
+        projectId: "distributedsystemspart2",
+        storageBucket: "distributedsystemspart2.appspot.com",
+        messagingSenderId: "1001499911733",
+        appId: "1:1001499911733:web:2d16ee1f661299211d337c"
+    }
 }
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
