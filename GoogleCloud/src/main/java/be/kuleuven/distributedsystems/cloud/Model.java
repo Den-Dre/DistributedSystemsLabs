@@ -14,9 +14,7 @@ import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
@@ -30,7 +28,8 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static be.kuleuven.distributedsystems.cloud.Application.db;
 
 @Component
 public class Model {
@@ -120,7 +119,25 @@ public class Model {
         allShows.addAll(shows);
         allShows.addAll(shows2);
 
+        try {
+            for (DocumentSnapshot snap : db.collection(Application.localShowCollectionName).get().get().getDocuments()) {
+                Show show = getShowFromSnap(snap);
+                allShows.add(show);
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
         return allShows;
+    }
+
+    private Show getShowFromSnap(DocumentSnapshot snap) {
+        String showName = snap.get("name").toString();
+        String location = snap.get("location").toString();
+        String image = snap.get("image").toString();
+        UUID showId = mapToUUID(snap.get("showId"));
+        return new Show(Application.companyName, showId, showName, location, image);
     }
 
     /**
@@ -131,7 +148,6 @@ public class Model {
      * @return A {@link Show} object.
      */
     public Show getShow(String company, UUID showId) {
-
         boolean succes = false;
         Show show = null;
         while (!succes) {
@@ -365,7 +381,7 @@ public class Model {
 
     @SuppressWarnings("unchecked")
     private UUID mapToUUID(Object map) {
-        System.out.println("Received map in mapToUUID: " + map);
+        // System.out.println("Received map in mapToUUID: " + map);
         Map<String, Long> castMap = (Map<String, Long>) map;
         castMap.entrySet().forEach(System.out::println);
         return new UUID(
