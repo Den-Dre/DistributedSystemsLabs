@@ -1,17 +1,16 @@
 package be.kuleuven.distributedsystems.cloud;
 
-import be.kuleuven.distributedsystems.cloud.entities.Seat;
-import be.kuleuven.distributedsystems.cloud.entities.Show;
+import be.kuleuven.distributedsystems.cloud.entities.*;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.api.gax.grpc.InstantiatingGrpcChannelProvider;
 import com.google.auth.Credentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
-import com.google.cloud.firestore.QuerySnapshot;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.grpc.ManagedChannelBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -24,6 +23,7 @@ import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -41,8 +41,13 @@ public class Application {
     public static final String TOPIC = "ABCDEFGH";
     public static Firestore firestore;
     public final static String localShowCollectionName = "LocalShows";
-    public final static String companyName = "MartijnAndreasCo";
+    public final static String localCompanyName = "MartijnAndreasCo";
+    public final static String urCompanyName = "unreliabletheatrecompany";
+    public final static String rCompanyName = "reliabletheatrecompany";
     private final static String seatsCollectionName = "seats";
+
+    @Autowired
+    private final WebClient.Builder webClientBuilder = WebClient.builder();
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
@@ -103,10 +108,10 @@ public class Application {
                 price = currentSeat.get("price").getAsDouble();
                 time = currentSeat.get("time").getAsString();
 
-                Seat seat = new Seat(companyName, showId, UUID.randomUUID(), LocalDateTime.parse(time, formatter), type, seatName, price);
+                Seat seat = new Seat(localCompanyName, showId, UUID.randomUUID(), LocalDateTime.parse(time, formatter), type, seatName, price);
                 seatsMap.put(seat.getSeatId().toString(), seat);
             }
-            Show show = new Show(companyName, showId, name, location, image);
+            Show show = new Show(localCompanyName, showId, name, location, image);
             try {
                 db().collection(localShowCollectionName).document(name + showId).set(show).get();
                 db().collection(localShowCollectionName).document(name + showId).collection(seatsCollectionName).document("seats").set(seatsMap).get();
@@ -204,5 +209,18 @@ public class Application {
                 .build()
                 .getService();
     }
+
+    @Bean
+    HashMap<String, ICompany> companies() {
+        HashMap<String, ICompany> companyMap = new HashMap<>();
+        companyMap.put(rCompanyName, new RemoteCompany(rCompanyName, db(), webClientBuilder));
+        companyMap.put(urCompanyName, new RemoteCompany(urCompanyName, db(), webClientBuilder));
+        companyMap.put(Application.localCompanyName, new LocalCompany(db()));
+        return companyMap;
+    }
+
+
+
+//    public static HashMap<String, ICompany> companies = createCompanies();
 
 }
