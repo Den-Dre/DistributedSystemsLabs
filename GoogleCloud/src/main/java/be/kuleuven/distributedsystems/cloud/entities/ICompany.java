@@ -33,7 +33,7 @@ public interface ICompany {
      default UUID mapToUUID(Object map) {
         // System.out.println("Received map in mapToUUID: " + map);
         Map<String, Long> castMap = (Map<String, Long>) map;
-        castMap.entrySet().forEach(System.out::println);
+        // castMap.entrySet().forEach(System.out::println);
         return new UUID(
                 castMap.get("mostSignificantBits"),
                 castMap.get("leastSignificantBits")

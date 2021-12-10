@@ -36,14 +36,16 @@ public class LocalCompany implements ICompany {
         return allShows;
     }
 
-    public Show getShow(UUID showID, WebClient.Builder builder) {
-        Query query = db.collection(Application.localShowCollectionName).whereEqualTo("showId", showID);
+    public Show getShow(UUID showId, WebClient.Builder builder) {
+        Query query = db.collection(Application.localShowCollectionName).whereEqualTo("showId", showId);
 
         ApiFuture<QuerySnapshot> querySnapshot = query.get();
         Show show = null;
         try {
             for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
-                show = documentToShow(document);
+                System.out.println("Show retrieved: " + document.get("name"));
+                show = getShowFromSnap(document);
+
             }
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -53,6 +55,7 @@ public class LocalCompany implements ICompany {
     }
 
     public List<LocalDateTime> getShowTimes(UUID showId, WebClient.Builder builder) {
+        // TODO: how to get times?
         return null;
     }
 
@@ -61,11 +64,6 @@ public class LocalCompany implements ICompany {
     }
 
     public Seat getSeat(UUID showId, UUID seatId, WebClient.Builder builder) {
-        return null;
-    }
-
-
-    private Show documentToShow(DocumentSnapshot doc) {
         return null;
     }
 }
