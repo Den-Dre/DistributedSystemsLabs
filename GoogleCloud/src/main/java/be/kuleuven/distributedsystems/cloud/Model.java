@@ -14,11 +14,7 @@ import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,22 +26,25 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class Model {
 
     private static final int RETRY_DELAY = 1000;
 
-    @Autowired
-    private final WebClient.Builder builder = WebClient.builder();
-
     private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
     @Resource(name = "db")
     private Firestore db;
 
+    private final HashMap<String, ICompany> companies; // = createCompanies();
+
     private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
+
+    @Autowired
+    public Model(HashMap<String, ICompany> companies) {
+        this.companies = companies;
+    }
 
     public void addBestCustomer(String customer, ArrayList<Ticket> tickets) {
         if (bestCustomersList.containsKey(customer))
@@ -75,52 +74,74 @@ public class Model {
      * @return A List of {@link Show} objects.
      */
     public List<Show> getShows()  {
-        var shows = builder
-                            .baseUrl("https://reliabletheatrecompany.com/")
-                            .build()
-                            .get()
-                            .uri(builder -> builder
-                                    .pathSegment("shows")
-                                    .queryParam("key", API_KEY)
-                                    .build())
-                            .retrieve()
-                            .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
-                            .block()
-                            .getContent();
-        boolean succes = false;
-        Collection<Show>shows2 = null;
-        while (!succes) {
-            try {
-                shows2 = builder
-                        .baseUrl("https://unreliabletheatrecompany.com/")
-                        .build()
-                        .get()
-                        .uri(builder -> builder
-                                .pathSegment("shows")
-                                .queryParam("key", API_KEY)
-                                .build())
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
-                        .block()
-                        .getContent();
-                succes = true;
-            } catch (Exception e) {
-                System.out.println(e);
-                try {
-                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
-                } catch (InterruptedException e2) {
-                    System.out.println(e2);
-                }
-
-            }
+//        var shows = builder
+//                            .baseUrl("https://reliabletheatrecompany.com/")
+//                            .build()
+//                            .get()
+//                            .uri(builder -> builder
+//                                    .pathSegment("shows")
+//                                    .queryParam("key", API_KEY)
+//                                    .build())
+//                            .retrieve()
+//                            .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
+//                            .block()
+//                            .getContent();
+//        boolean succes = false;
+//        Collection<Show>shows2 = null;
+//        while (!succes) {
+//            try {
+//                shows2 = builder
+//                        .baseUrl("https://unreliabletheatrecompany.com/")
+//                        .build()
+//                        .get()
+//                        .uri(builder -> builder
+//                                .pathSegment("shows")
+//                                .queryParam("key", API_KEY)
+//                                .build())
+//                        .retrieve()
+//                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Show>>() {})
+//                        .block()
+//                        .getContent();
+//                succes = true;
+//            } catch (Exception e) {
+//                System.out.println(e);
+//                try {
+//                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+//                } catch (InterruptedException e2) {
+//                    System.out.println(e2);
+//                }
+//
+//            }
+//        }
+//
+//
+//        List<Show> allShows = new ArrayList<>();
+//        allShows.addAll(shows);
+//        allShows.addAll(shows2);
+//
+//        try {
+//            for (DocumentSnapshot snap : db.collection(Application.localShowCollectionName).get().get().getDocuments()) {
+//                Show show = getShowFromSnap(snap);
+//                allShows.add(show);
+//            }
+//
+//        } catch (InterruptedException | ExecutionException e) {
+//            e.printStackTrace();
+//        }
+        List<Show> allShows = new ArrayList<>();
+        for (ICompany company : companies.values()) {
+            allShows.addAll(company.getShows());
         }
 
-
-        List<Show> allShows = new ArrayList<>();
-        allShows.addAll(shows);
-        allShows.addAll(shows2);
-
         return allShows;
+    }
+
+    private Show getShowFromSnap(DocumentSnapshot snap) {
+        String showName = snap.get("name").toString();
+        String location = snap.get("location").toString();
+        String image = snap.get("image").toString();
+        UUID showId = mapToUUID(snap.get("showId"));
+        return new Show(Application.localCompanyName, showId, showName, location, image);
     }
 
     /**
@@ -131,35 +152,33 @@ public class Model {
      * @return A {@link Show} object.
      */
     public Show getShow(String company, UUID showId) {
-
-        boolean succes = false;
-        Show show = null;
-        while (!succes) {
-            try {
-                show = builder
-                        .baseUrl(String.format("https://%s/", company))
-                        .build()
-                        .get()
-                        .uri(builder -> builder
-                                .pathSegment("shows/{showId}")
-                                .queryParam("key", API_KEY)
-                                .build(showId.toString()))
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<Show>() {})
-                        .block();
-                succes = true;
-            } catch (Exception e) {
-                System.out.println(e);
-                try {
-                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
-                } catch (InterruptedException e2) {
-                    System.out.println(e2);
-                }
-
-            }
-        }
-
-        return show;
+//        boolean succes = false;
+//        Show show = null;
+//        while (!succes) {
+//            try {
+//                show = builder
+//                        .baseUrl(String.format("https://%s/", company))
+//                        .build()
+//                        .get()
+//                        .uri(builder -> builder
+//                                .pathSegment("shows/{showId}")
+//                                .queryParam("key", API_KEY)
+//                                .build(showId.toString()))
+//                        .retrieve()
+//                        .bodyToMono(new ParameterizedTypeReference<Show>() {})
+//                        .block();
+//                succes = true;
+//            } catch (Exception e) {
+//                System.out.println(e);
+//                try {
+//                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+//                } catch (InterruptedException e2) {
+//                    System.out.println(e2);
+//                }
+//
+//            }
+//        }
+        return companies.get(company).getShow(showId);
     }
 
     /**
@@ -170,34 +189,35 @@ public class Model {
      * @return A List of {@link LocalDateTime} objects.
      */
     public List<LocalDateTime> getShowTimes(String company, UUID showId) {
-        boolean succes = false;
-        Collection<LocalDateTime> times  = null;
-        while (!succes) {
-            try {
-                times = builder
-                        .baseUrl(String.format("https://%s/", company))
-                        .build()
-                        .get()
-                        .uri(builder -> builder
-                                .pathSegment("shows/{showId}/times")
-                                .queryParam("key", API_KEY)
-                                .build(showId.toString()))
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<LocalDateTime>>() {})
-                        .block()
-                        .getContent();
-                succes = true;
-            } catch (Exception e) {
-                System.out.println(e);
-                try {
-                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
-                } catch (InterruptedException e2) {
-                    System.out.println(e2);
-                }
-
-            }
-        }
-        return List.copyOf(times);
+//        boolean succes = false;
+//        Collection<LocalDateTime> times  = null;
+//        while (!succes) {
+//            try {
+//                times = builder
+//                        .baseUrl(String.format("https://%s/", company))
+//                        .build()
+//                        .get()
+//                        .uri(builder -> builder
+//                                .pathSegment("shows/{showId}/times")
+//                                .queryParam("key", API_KEY)
+//                                .build(showId.toString()))
+//                        .retrieve()
+//                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<LocalDateTime>>() {})
+//                        .block()
+//                        .getContent();
+//                succes = true;
+//            } catch (Exception e) {
+//                System.out.println(e);
+//                try {
+//                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+//                } catch (InterruptedException e2) {
+//                    System.out.println(e2);
+//                }
+//
+//            }
+//        }
+//        return List.copyOf(times);
+        return companies.get(company).getShowTimes(showId);
     }
 
     /**
@@ -209,67 +229,69 @@ public class Model {
      * @return A list of available {@link Seat} objects.
      */
     public List<Seat> getAvailableSeats(String company, UUID showId, LocalDateTime time) {
-        boolean succes = false;
-        Collection<Seat> seats  = null;
-        while (!succes) {
-            try {
-                seats = builder
-                        .baseUrl(String.format("https://%s/", company))
-                        .build()
-                        .get()
-                        .uri(builder -> builder
-                                .pathSegment("shows/{showId}/seats")
-                                .queryParam("key", API_KEY)
-                                .queryParam("time", time.toString())
-                                .queryParam("available", "true")
-                                .build(showId.toString()))
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Seat>>() {})
-                        .block()
-                        .getContent();
-                succes = true;
-            } catch (Exception e) {
-                System.out.println(e);
-                try {
-                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
-                } catch (InterruptedException e2) {
-                    System.out.println(e2);
-                }
-
-            }
-        }
-        return List.copyOf(seats);
+//        boolean succes = false;
+//        Collection<Seat> seats  = null;
+//        while (!succes) {
+//            try {
+//                seats = builder
+//                        .baseUrl(String.format("https://%s/", company))
+//                        .build()
+//                        .get()
+//                        .uri(builder -> builder
+//                                .pathSegment("shows/{showId}/seats")
+//                                .queryParam("key", API_KEY)
+//                                .queryParam("time", time.toString())
+//                                .queryParam("available", "true")
+//                                .build(showId.toString()))
+//                        .retrieve()
+//                        .bodyToMono(new ParameterizedTypeReference<CollectionModel<Seat>>() {})
+//                        .block()
+//                        .getContent();
+//                succes = true;
+//            } catch (Exception e) {
+//                System.out.println(e);
+//                try {
+//                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+//                } catch (InterruptedException e2) {
+//                    System.out.println(e2);
+//                }
+//
+//            }
+//        }
+//        return List.copyOf(seats);
+        return companies.get(company).getAvailableSeats(showId, time);
     }
 
     public Seat getSeat(String company, UUID showId, UUID seatId) {
-        boolean succes = false;
-        Seat seat  = null;
-        while (!succes) {
-            try {
-                seat = builder
-                        .baseUrl(String.format("https://%s/", company))
-                        .build()
-                        .get()
-                        .uri(builder -> builder
-                                .pathSegment("shows/{showId}/seats/{seatId}")
-                                .queryParam("key", API_KEY)
-                                .build(showId.toString(), seatId.toString()))
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<Seat>() {})
-                        .block();
-                succes = true;
-            } catch (Exception e) {
-                System.out.println(e);
-                try {
-                    TimeUnit.MILLISECONDS.sleep(500);
-                } catch (InterruptedException e2) {
-                    System.out.println(e2);
-                }
-
-            }
-        }
-
-        return seat;
+//        boolean succes = false;
+//        Seat seat  = null;
+//        while (!succes) {
+//            try {
+//                seat = builder
+//                        .baseUrl(String.format("https://%s/", company))
+//                        .build()
+//                        .get()
+//                        .uri(builder -> builder
+//                                .pathSegment("shows/{showId}/seats/{seatId}")
+//                                .queryParam("key", API_KEY)
+//                                .build(showId.toString(), seatId.toString()))
+//                        .retrieve()
+//                        .bodyToMono(new ParameterizedTypeReference<Seat>() {})
+//                        .block();
+//                succes = true;
+//            } catch (Exception e) {
+//                System.out.println(e);
+//                try {
+//                    TimeUnit.MILLISECONDS.sleep(500);
+//                } catch (InterruptedException e2) {
+//                    System.out.println(e2);
+//                }
+//
+//            }
+//        }
+//
+//        return seat;
+        return companies.get(company).getSeat(showId, seatId);
     }
 
     /**
@@ -365,7 +387,7 @@ public class Model {
 
     @SuppressWarnings("unchecked")
     private UUID mapToUUID(Object map) {
-        System.out.println("Received map in mapToUUID: " + map);
+        // System.out.println("Received map in mapToUUID: " + map);
         Map<String, Long> castMap = (Map<String, Long>) map;
         castMap.entrySet().forEach(System.out::println);
         return new UUID(

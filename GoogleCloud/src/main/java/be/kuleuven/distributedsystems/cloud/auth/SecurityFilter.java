@@ -45,6 +45,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             try {
                 getKeys();
                 DecodedJWT jwt= JWT.decode(session.getValue());
+                System.out.println("JWT: " + jwt.getHeader());
                 var kid = jwt.getKeyId();
 
                 String role = jwt.getClaim("role").asString();
@@ -54,7 +55,6 @@ public class SecurityFilter extends OncePerRequestFilter {
                 String mail = jwt.getClaim("email").asString();
                 user = new User(mail, role);
 
-                //jwt.getClaims().keySet().forEach(System.out::println);
             } catch (JWTDecodeException e) {
                 System.out.println(e);
                 System.out.println("decode-exception");
@@ -96,14 +96,6 @@ public class SecurityFilter extends OncePerRequestFilter {
                 con.disconnect();
         }
 
-//        return builder
-//                .baseUrl("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
-//                .build()
-//                .get()
-//                .retrieve()
-//                .bodyToMono(new ParameterizedTypeReference<CollectionModel<String>>() {})
-//                .block()
-//                .getContent();
     }
 
     @Override
