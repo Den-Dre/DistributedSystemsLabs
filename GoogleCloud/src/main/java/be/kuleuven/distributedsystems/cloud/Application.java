@@ -42,12 +42,12 @@ public class Application {
     public static Firestore firestore;
     public final static String localShowCollectionName = "LocalShows";
     public final static String localCompanyName = "MartijnAndreasCo";
-    public final static String urCompanyName = "unreliabletheatrecompany";
-    public final static String rCompanyName = "reliabletheatrecompany";
+    public final static String urCompanyName = "unreliabletheatrecompany.com";
+    public final static String rCompanyName = "reliabletheatrecompany.com";
     private final static String seatsCollectionName = "seats";
 
-    @Autowired
-    private final WebClient.Builder webClientBuilder = WebClient.builder();
+//    @Autowired
+//    private final WebClient.Builder webClientBuilder = WebClient.builder();
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
@@ -213,8 +213,8 @@ public class Application {
     @Bean
     HashMap<String, ICompany> companies() {
         HashMap<String, ICompany> companyMap = new HashMap<>();
-        companyMap.put(rCompanyName, new RemoteCompany(rCompanyName, db(), webClientBuilder));
-        companyMap.put(urCompanyName, new RemoteCompany(urCompanyName, db(), webClientBuilder));
+        companyMap.put(rCompanyName, new RemoteCompany(rCompanyName, db()));
+        companyMap.put(urCompanyName, new RemoteCompany(urCompanyName, db()));
         companyMap.put(Application.localCompanyName, new LocalCompany(db()));
         return companyMap;
     }
