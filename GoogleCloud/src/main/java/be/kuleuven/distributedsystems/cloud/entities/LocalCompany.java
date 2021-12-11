@@ -2,15 +2,10 @@ package be.kuleuven.distributedsystems.cloud.entities;
 
 import be.kuleuven.distributedsystems.cloud.Application;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.Query;
-import com.google.cloud.firestore.QuerySnapshot;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.google.cloud.firestore.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -55,15 +50,50 @@ public class LocalCompany implements ICompany {
     }
 
     public List<LocalDateTime> getShowTimes(UUID showId, WebClient.Builder builder) {
-        // TODO: how to get times?
-        return null;
+        List<LocalDateTime> times = null;
+        try {
+            DocumentSnapshot snap = db.collection(Application.localShowCollectionName).document(showId.toString()).collection(Application.timesCollectionName).document(Application.timesCollectionName).get().get();
+            times = getTimesFromSnap(snap);
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return times;
     }
 
     public List<Seat> getAvailableSeats(UUID showId, LocalDateTime time, WebClient.Builder builder) {
-        return null;
+        Query query = db.collection(Application.localShowCollectionName).document(showId.toString()).collection(Application.seatsCollectionName).whereEqualTo("time", time);
+        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+
+        List<Seat> seats = new ArrayList<>();
+        try {
+            for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
+                seats.add(getSeatFromSnap(document));
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return seats;
     }
 
+    // TODO: test this method (can only be done after getAvailableSeats)
     public Seat getSeat(UUID showId, UUID seatId, WebClient.Builder builder) {
-        return null;
+        Seat seat = null;
+
+        try {
+            DocumentSnapshot snap = db.collection(Application.localShowCollectionName)
+                    .document(showId.toString())
+                    .collection(Application.seatsCollectionName)
+                    .document(seatId.toString()).get().get();
+            seat = getSeatFromSnap(snap);
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+
+        return seat;
     }
 }

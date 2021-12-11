@@ -44,7 +44,12 @@ public class Application {
     public final static String localCompanyName = "MartijnAndreasCo";
     public final static String urCompanyName = "unreliabletheatrecompany.com";
     public final static String rCompanyName = "reliabletheatrecompany.com";
-    private final static String seatsCollectionName = "seats";
+
+    // TODO: make private and make getters
+    public final static String seatsCollectionName = "seats";
+    public final static String timesCollectionName = "times";
+
+    private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
 //    @Autowired
 //    private final WebClient.Builder webClientBuilder = WebClient.builder();
@@ -57,13 +62,6 @@ public class Application {
         // Apache JSP scans by default all JARs, which is not necessary, so disable it
         System.setProperty(org.apache.tomcat.util.scan.Constants.SKIP_JARS_PROPERTY, "*.jar");
         System.setProperty(org.apache.tomcat.util.scan.Constants.SCAN_JARS_PROPERTY, "taglibs-standard-spec-*.jar,taglibs-standard-impl-*.jar");
-//        firestore = FirestoreOptions.getDefaultInstance().toBuilder()
-//                .setProjectId("demo-distributed-systems-kul")
-//                .setHost("localhost:8084")
-//                .setCredentials(new FirestoreOptions.EmulatorCredentials())
-//                .setCredentialsProvider(FixedCredentialsProvider.create(new FirestoreOptions.EmulatorCredentials()))
-//                .build()
-//                .getService();
 
         // Start Spring Boot application
         ApplicationContext context = SpringApplication.run(Application.class, args);
@@ -73,7 +71,7 @@ public class Application {
 
         try {
             if (db().collection(localShowCollectionName).limit(1).get().get().isEmpty()) {
-                System.out.println("Hoera!");
+                System.out.println("Local shows database is empty: uploading data.json");
                 uploadLocalShows();
             }
 
@@ -83,6 +81,9 @@ public class Application {
     }
 
     private static void uploadLocalShows() {
+        // Calling db() each time when uploading to firestore caused the weird channel allocation site error
+        // Solution -> call it once for the whole method
+        Firestore fs = db();
         String contents = readLocalShows();
 
         JsonParser parser = new JsonParser();
@@ -100,26 +101,40 @@ public class Application {
             String type, seatName, time;
             double price;
             DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-            HashMap<String, Object> seatsMap = new HashMap<>();
+            // HashMap<String, Object> seatsMap = new HashMap<>();
+            List<Seat> seatsList = new ArrayList<>();
+
+            HashSet<LocalDateTime> timesSet = new HashSet<>();
+
             for (int j = 0; j < seats.size(); j++) {
                 JsonObject currentSeat = seats.get(j).getAsJsonObject();
                 type = currentSeat.get("type").getAsString();
                 seatName = currentSeat.get("name").getAsString();
                 price = currentSeat.get("price").getAsDouble();
                 time = currentSeat.get("time").getAsString();
+                LocalDateTime timeObj = LocalDateTime.parse(time, formatter);
+                timesSet.add(timeObj);
 
-                Seat seat = new Seat(localCompanyName, showId, UUID.randomUUID(), LocalDateTime.parse(time, formatter), type, seatName, price);
-                seatsMap.put(seat.getSeatId().toString(), seat);
+                Seat seat = new Seat(localCompanyName, showId, UUID.randomUUID(), timeObj, type, seatName, price);
+                // seatsMap.put(seat.getSeatId().toString(), seat);
+                seatsList.add(seat);
             }
             Show show = new Show(localCompanyName, showId, name, location, image);
+
+            HashMap<String, ArrayList<LocalDateTime>> timesMap = new HashMap<>();
+            timesMap.put("times", new ArrayList<>(timesSet));
+
             try {
-                db().collection(localShowCollectionName).document(name + showId).set(show).get();
-                db().collection(localShowCollectionName).document(name + showId).collection(seatsCollectionName).document("seats").set(seatsMap).get();
+                fs.collection(localShowCollectionName).document(showId.toString()).set(show).get();
+                for (Seat s: seatsList) {
+                    fs.collection(localShowCollectionName).document(showId.toString()).collection(seatsCollectionName).document(s.getSeatId().toString()).set(s).get();
+                }
+                // db().collection(localShowCollectionName).document(showId.toString()).collection(seatsCollectionName).document("seats").set(seatsMap).get();
+                fs.collection(localShowCollectionName).document(showId.toString()).collection(timesCollectionName).document(timesCollectionName).set(timesMap).get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
-
     }
 
     private static String readLocalShows()  {
@@ -178,6 +193,8 @@ public class Application {
         return "demo-distributed-systems-kul";
     }
 
+    public String get_API_KEY() { return API_KEY; }
+
     /*
      * You can use this builder to create a Spring WebClient instance which can be used to make REST-calls.
      */
@@ -218,9 +235,4 @@ public class Application {
         companyMap.put(Application.localCompanyName, new LocalCompany(db()));
         return companyMap;
     }
-
-
-
-//    public static HashMap<String, ICompany> companies = createCompanies();
-
 }

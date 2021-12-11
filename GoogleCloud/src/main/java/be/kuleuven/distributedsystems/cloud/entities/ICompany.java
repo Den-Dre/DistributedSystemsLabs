@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public interface ICompany {
@@ -29,6 +27,42 @@ public interface ICompany {
         UUID showId = mapToUUID(snap.get("showId"));
         return new Show(Application.localCompanyName, showId, showName, location, image);
     }
+
+    default List<LocalDateTime> getTimesFromSnap(DocumentSnapshot snap) {
+         List<HashMap<String, Object>> timesMap = (List<HashMap<String, Object>>) snap.get("times");
+
+         List<LocalDateTime> times = new ArrayList<>();
+
+         for (HashMap<String, Object> timeMap: timesMap) {
+             times.add(getTimeFromHashMap(timeMap));
+         }
+         return times;
+    }
+
+    default LocalDateTime getTimeFromHashMap(HashMap<String, Object> timeMap) {
+        return LocalDateTime.of(
+                Math.toIntExact((long) timeMap.get("year")),
+                Math.toIntExact((long) timeMap.get("monthValue")),
+                Math.toIntExact((long) timeMap.get("dayOfMonth")),
+                Math.toIntExact((long) timeMap.get("hour")),
+                Math.toIntExact((long) timeMap.get("minute")),
+                Math.toIntExact((long) timeMap.get("second")),
+                Math.toIntExact((long) timeMap.get("nano"))
+        );
+    }
+
+    default Seat getSeatFromSnap(DocumentSnapshot snap) {
+        String company = snap.get("company").toString();
+        UUID showId = mapToUUID(snap.get("showId"));
+        UUID seatId = mapToUUID(snap.get("seatId"));
+        LocalDateTime time = getTimeFromHashMap((HashMap<String, Object>) snap.get("time"));
+        String type = snap.get("type").toString();
+        String name = snap.get("name").toString();
+        Double price = (Double) snap.get("price");
+        return new Seat(company, showId, seatId, time, type,name, price);
+    }
+
+
 
      default UUID mapToUUID(Object map) {
         // System.out.println("Received map in mapToUUID: " + map);
