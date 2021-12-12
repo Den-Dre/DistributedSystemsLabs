@@ -96,4 +96,12 @@ public class LocalCompany implements ICompany {
 
         return seat;
     }
+
+    public Ticket confirmQuote(Quote quote, String customer, String api_key, WebClient.Builder builder) {
+        return null;
+    }
+
+    public void undoBooking(Ticket t, String API_KEY, WebClient.Builder builder) {
+
+    }
 }

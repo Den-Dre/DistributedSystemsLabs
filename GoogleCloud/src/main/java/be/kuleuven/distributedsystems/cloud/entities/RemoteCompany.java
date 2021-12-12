@@ -202,4 +202,37 @@ public class RemoteCompany implements ICompany {
         return seat;
     }
 
+    public Ticket confirmQuote(Quote q, String customer, String api_key, WebClient.Builder builder) {
+        return builder
+                .baseUrl(String.format("https://%s/", q.getCompany()))
+                .build()
+                .put()
+                .uri(builder2 -> builder2
+                        .pathSegment("shows/{showId}/seats/{seatId}/ticket")
+                        .queryParam("customer", customer)
+                        .queryParam("key", api_key.replaceAll("\"", ""))
+                        .build(q.getShowId().toString(), q.getSeatId().toString()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Ticket>() {
+                })
+                .block();
+    }
+
+    // Remove made bookings due to a duplicate booking being present in the list
+    public void undoBooking(Ticket t, String API_KEY, WebClient.Builder builder) {
+        var ticket = builder
+                .baseUrl(String.format("https://%s/", t.getCompany()))
+                .build()
+                .delete()
+                .uri(builder2 -> builder2
+                        .pathSegment("shows/{showId}/seats/{seatId}/ticket/{ticketID}")
+                        .queryParam("customer", t.getCustomer())
+                        .queryParam("key", API_KEY.replaceAll("\"", ""))
+                        .build(t.getShowId().toString(), t.getSeatId().toString(), t.getTicketId().toString()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Ticket>() {
+                })
+                .block();
+
+    }
 }

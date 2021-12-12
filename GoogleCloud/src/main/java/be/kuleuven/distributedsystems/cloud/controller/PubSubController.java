@@ -2,9 +2,7 @@ package be.kuleuven.distributedsystems.cloud.controller;
 
 import be.kuleuven.distributedsystems.cloud.Application;
 import be.kuleuven.distributedsystems.cloud.Model;
-import be.kuleuven.distributedsystems.cloud.entities.Booking;
-import be.kuleuven.distributedsystems.cloud.entities.Quote;
-import be.kuleuven.distributedsystems.cloud.entities.Ticket;
+import be.kuleuven.distributedsystems.cloud.entities.*;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
@@ -25,6 +23,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -39,9 +38,12 @@ public class PubSubController {
     @Resource(name = "db")
     private Firestore db;
 
+    private final HashMap<String, ICompany> companies;
+
     @Autowired
-    public PubSubController(Model model) {
+    public PubSubController(Model model, HashMap<String, ICompany> companies) {
         this.model = model;
+        this.companies = companies;
     }
 
     // https://cloud.google.com/pubsub/docs/troubleshooting#messages
@@ -50,7 +52,7 @@ public class PubSubController {
         System.out.println("In confirmQuote");
         String customer;
         ArrayList<Quote> quotes;
-        ArrayList<Ticket> successfulTicketIDs = new ArrayList<>();
+        ArrayList<Ticket> successfulTickets = new ArrayList<>();
         String API_KEY = null;
 
         try {
@@ -69,34 +71,26 @@ public class PubSubController {
             String finalCustomer = customer.replaceAll("\"", "");
             for (Quote q : quotes) {
                  // PubsubMessage.builder and publish
-                String finalAPI_KEY = API_KEY;
-                var ticket = builder
-                        .baseUrl(String.format("https://%s/", q.getCompany()))
-                        .build()
-                        .put()
-                        .uri(builder -> builder
-                                .pathSegment("shows/{showId}/seats/{seatId}/ticket")
-                                .queryParam("customer", finalCustomer)
-                                .queryParam("key", finalAPI_KEY.replaceAll("\"", ""))
-                                .build(q.getShowId().toString(), q.getSeatId().toString()))
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<Ticket>() {
-                        })
-                        .block();
-
-                successfulTicketIDs.add(ticket);
+                ICompany company = companies.get(q.getCompany());
+                var ticket = company.confirmQuote(q, customer, API_KEY, builder);
+                successfulTickets.add(ticket);
             }
+
             ArrayList<Ticket> tickets = quotes.stream().map(
                     quote -> new Ticket(quote.getCompany(), quote.getShowId(), quote.getSeatId(), UUID.randomUUID(), finalCustomer)
             ).collect(Collectors.toCollection(ArrayList::new));
             // TODO decouple from Model?
             this.model.addBestCustomer(customer, tickets);
+
             addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, finalCustomer));
 
         } catch (Exception e) {
             // Prevent duplicate bookings
             System.out.println("Duplicate booking detected: " + e);
-            undoBookings(successfulTicketIDs, API_KEY);
+            String finalAPI_KEY = API_KEY;
+            // delegate the deletion of tickets to their respective companies
+            successfulTickets.forEach(t -> companies.get(t.getCompany()).undoBooking(t, finalAPI_KEY, builder));
+            // undoBookings(successfulTicketIDs, API_KEY);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -114,22 +108,23 @@ public class PubSubController {
         }
     }
 
-    // Remove made bookings due to a duplicate booking being present in the list
-    private void undoBookings(ArrayList<Ticket> toDelete, String API_KEY) {
-        for (Ticket t : toDelete) {
-            var ticket = builder
-                    .baseUrl(String.format("https://%s/", t.getCompany()))
-                    .build()
-                    .delete()
-                    .uri(builder -> builder
-                            .pathSegment("shows/{showId}/seats/{seatId}/ticket/{ticketID}")
-                            .queryParam("customer", t.getCustomer())
-                            .queryParam("key", API_KEY.replaceAll("\"", ""))
-                            .build(t.getShowId().toString(), t.getSeatId().toString(), t.getTicketId().toString()))
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Ticket>() {
-                    })
-                    .block();
-        }
-    }
+//    // Remove made bookings due to a duplicate booking being present in the list
+//    private void undoBookings(ArrayList<Ticket> toDelete, String API_KEY) {
+//        for (Ticket t : toDelete) {
+//
+//            var ticket = builder
+//                    .baseUrl(String.format("https://%s/", t.getCompany()))
+//                    .build()
+//                    .delete()
+//                    .uri(builder -> builder
+//                            .pathSegment("shows/{showId}/seats/{seatId}/ticket/{ticketID}")
+//                            .queryParam("customer", t.getCustomer())
+//                            .queryParam("key", API_KEY.replaceAll("\"", ""))
+//                            .build(t.getShowId().toString(), t.getSeatId().toString(), t.getTicketId().toString()))
+//                    .retrieve()
+//                    .bodyToMono(new ParameterizedTypeReference<Ticket>() {
+//                    })
+//                    .block();
+//        }
+//    }
 }

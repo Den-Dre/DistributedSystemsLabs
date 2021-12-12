@@ -180,9 +180,9 @@ public class Model {
     public List<Booking> getAllBookings() {
         List<Booking> bookings = new ArrayList<>();
         try {
-            // Retrieve the bookings
+            // Retrieve the bookings from firestore
             QuerySnapshot snapshot = db.collection("Bookings").get().get();
-            // Loop over all the bookings from firestore
+            // Loop over all the snapshots
             for (DocumentSnapshot bookingSnap : snapshot.getDocuments()) {
                 bookings.add(bookingFromSnap(bookingSnap));
             }
@@ -228,9 +228,7 @@ public class Model {
 
     @SuppressWarnings("unchecked")
     private UUID mapToUUID(Object map) {
-        // System.out.println("Received map in mapToUUID: " + map);
         Map<String, Long> castMap = (Map<String, Long>) map;
-        castMap.entrySet().forEach(System.out::println);
         return new UUID(
                 castMap.get("mostSignificantBits"),
                 castMap.get("leastSignificantBits")
@@ -282,7 +280,6 @@ public class Model {
             ArrayList<Quote> quotesArray = new ArrayList<>(quotes);
             byte[] quotesSerialized = SerializationUtils.serialize(quotesArray);
             ByteString data = ByteString.copyFrom(quotesSerialized);
-            System.out.println("Quote of ticket: " + quotesSerialized.toString());
             PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAttributes("customer", customer).putAttributes("apiKey", API_KEY).build();
             // if we don't add this .get(), the finally clause gets executed before the message is sent: apiFuture.get() is a blocking call!
             publisher.publish(pubsubMessage).get();

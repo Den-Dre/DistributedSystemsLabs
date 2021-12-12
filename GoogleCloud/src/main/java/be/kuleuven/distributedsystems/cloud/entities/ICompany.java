@@ -22,6 +22,10 @@ public interface ICompany {
 
      List<Show> getShows(WebClient.Builder builder);
 
+     Ticket confirmQuote(Quote quote, String customer, String api_key, WebClient.Builder builder);
+
+     void undoBooking(Ticket toDelete, String API_KEY, WebClient.Builder builder);
+
      default Show getShowFromSnap(DocumentSnapshot snap) {
         String showName = snap.get("name").toString();
         String location = snap.get("location").toString();
