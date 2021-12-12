@@ -4,6 +4,7 @@ import be.kuleuven.distributedsystems.cloud.Application;
 import be.kuleuven.distributedsystems.cloud.Model;
 import be.kuleuven.distributedsystems.cloud.entities.*;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
 import com.google.gson.JsonObject;
@@ -21,10 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -79,8 +77,7 @@ public class PubSubController {
             ArrayList<Ticket> tickets = quotes.stream().map(
                     quote -> new Ticket(quote.getCompany(), quote.getShowId(), quote.getSeatId(), UUID.randomUUID(), finalCustomer)
             ).collect(Collectors.toCollection(ArrayList::new));
-            // TODO decouple from Model?
-            this.model.addBestCustomer(customer, tickets);
+            updateBestCustomers(customer, tickets.size());
 
             addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, finalCustomer));
 
@@ -106,6 +103,21 @@ public class PubSubController {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+    }
+
+    private void updateBestCustomers(String customer, Integer n_tickets) {
+        DocumentReference ref = db.collection(Application.bestCustomersCollectionName).document(customer);
+        try {
+            int n_tickets_current = 0;
+            try {
+                n_tickets_current = Math.toIntExact(ref.get().get().getLong("n_tickets"));
+            } catch (NullPointerException ignored){}
+            Map<String, Object> n_tickets_new = Collections.singletonMap("n_tickets", n_tickets_current + n_tickets);
+            ref.set(n_tickets_new).get();
+        } catch (InterruptedException | ExecutionException | NullPointerException e) {
+            e.printStackTrace();
+        }
+
     }
 
 //    // Remove made bookings due to a duplicate booking being present in the list

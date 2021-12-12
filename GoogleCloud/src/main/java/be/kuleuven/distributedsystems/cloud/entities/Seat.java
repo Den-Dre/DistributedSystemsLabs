@@ -11,6 +11,7 @@ public class Seat {
     private String type;
     private String name;
     private double price;
+    private boolean isBooked;
 
     public Seat() {
     }
@@ -23,6 +24,18 @@ public class Seat {
         this.type = type;
         this.name = name;
         this.price = price;
+        this.isBooked = false;
+    }
+
+    public Seat(String company, UUID showId, UUID seatId, LocalDateTime time, String type, String name, double price, boolean isBooked) {
+        this.company = company;
+        this.showId = showId;
+        this.seatId = seatId;
+        this.time = time;
+        this.type = type;
+        this.name = name;
+        this.price = price;
+        this.isBooked = isBooked;
     }
 
     public String getCompany() {
@@ -51,6 +64,10 @@ public class Seat {
 
     public double getPrice() {
         return this.price;
+    }
+
+    public boolean isBooked() {
+        return isBooked;
     }
 
     @Override

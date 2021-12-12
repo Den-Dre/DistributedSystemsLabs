@@ -41,6 +41,7 @@ public class Application {
     public static final String TOPIC = "ABCDEFGH";
     public static Firestore firestore;
     public final static String localShowCollectionName = "LocalShows";
+
     public final static String localCompanyName = "MartijnAndreasCo";
     public final static String urCompanyName = "unreliabletheatrecompany.com";
     public final static String rCompanyName = "reliabletheatrecompany.com";
@@ -48,6 +49,7 @@ public class Application {
     // TODO: make private and make getters
     public final static String seatsCollectionName = "seats";
     public final static String timesCollectionName = "times";
+    public final static String bestCustomersCollectionName = "bestCustomers";
 
     private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
@@ -123,11 +125,10 @@ public class Application {
 
             try {
                 fs.collection(localShowCollectionName).document(showId.toString()).set(show).get();
-                // Each seat is now a document. (Instead of all seats in one document called "seats" which is in the collection called "seats")
+                // Each seat is now a document. (Instead of all seats in one document called "seats" that is in the collection called "seats")
                 for (Seat s: seatsList) {
                     fs.collection(localShowCollectionName).document(showId.toString()).collection(seatsCollectionName).document(s.getSeatId().toString()).set(s).get();
                 }
-                // db().collection(localShowCollectionName).document(showId.toString()).collection(seatsCollectionName).document("seats").set(seatsMap).get();
                 fs.collection(localShowCollectionName).document(showId.toString()).collection(timesCollectionName).document(timesCollectionName).set(timesMap).get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();

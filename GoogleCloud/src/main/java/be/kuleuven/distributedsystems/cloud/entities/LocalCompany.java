@@ -18,6 +18,9 @@ public class LocalCompany implements ICompany {
         this.db = db;
     }
 
+    private final Map<String, Object> bookSeatMap = Collections.singletonMap("booked", true);
+    private final Map<String, Object> unbookSeatMap = Collections.singletonMap("booked", false);
+
     public List<Show> getShows(WebClient.Builder builder) {
         List<Show> allShows = new ArrayList<>();
         try {
@@ -61,9 +64,12 @@ public class LocalCompany implements ICompany {
         return times;
     }
 
-    // TODO: get the AVAILABLE seats
     public List<Seat> getAvailableSeats(UUID showId, LocalDateTime time, WebClient.Builder builder) {
-        Query query = db.collection(Application.localShowCollectionName).document(showId.toString()).collection(Application.seatsCollectionName).whereEqualTo("time", time);
+        Query query = db.collection(Application.localShowCollectionName)
+                .document(showId.toString())
+                .collection(Application.seatsCollectionName)
+                .whereEqualTo("time", time)
+                .whereEqualTo("booked", false);
         ApiFuture<QuerySnapshot> querySnapshot = query.get();
 
         List<Seat> seats = new ArrayList<>();
@@ -75,7 +81,6 @@ public class LocalCompany implements ICompany {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-
         return seats;
     }
 
@@ -97,11 +102,41 @@ public class LocalCompany implements ICompany {
         return seat;
     }
 
-    public Ticket confirmQuote(Quote quote, String customer, String api_key, WebClient.Builder builder) {
-        return null;
+    public Ticket confirmQuote(Quote q, String customer, String api_key, WebClient.Builder builder) throws Exception {
+        DocumentReference seatRef = db.collection(Application.localShowCollectionName)
+                .document(q.getShowId().toString())
+                .collection(Application.seatsCollectionName)
+                .document(q.getSeatId().toString());
+
+        DocumentSnapshot seatSnap = seatRef.get().get();
+        Boolean alreadyBooked = seatSnap.getBoolean("booked");
+        // If the seat is booked throw an error
+        if (Boolean.TRUE.equals(alreadyBooked))
+            throw new Exception("Double booking in LocalCompany");
+
+        // Book the seat
+        seatRef.update(bookSeatMap).get();
+        // TODO: is it correct to use UUID.randomUUID()?
+        return new Ticket(q.getCompany(), q.getShowId(), q.getSeatId(), UUID.randomUUID(), customer);
     }
 
     public void undoBooking(Ticket t, String API_KEY, WebClient.Builder builder) {
-
+        // TODO: does this method need to be implemented?
+        // --> If someone else has booked the seat before you, you will not be able to book it anyways
+        // + we don't want to un-book the other persons booking
+//        DocumentReference seatRef = db.collection(Application.localShowCollectionName)
+//                .document(t.getShowId().toString())
+//                .collection(Application.seatsCollectionName)
+//                .document(t.getSeatId().toString());
+//
+//        try {
+//            DocumentSnapshot seatSnap = seatRef.get().get();
+//            Boolean alreadyBooked = seatSnap.getBoolean("booked");
+//            System.out.println("Duplicate booking in local was: " + alreadyBooked);
+//
+//            seatRef.update(unbookSeatMap).get();
+//        } catch (InterruptedException | ExecutionException e) {
+//            e.printStackTrace();
+//        }
     }
 }

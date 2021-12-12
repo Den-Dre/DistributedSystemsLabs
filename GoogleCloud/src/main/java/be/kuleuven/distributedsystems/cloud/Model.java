@@ -39,35 +39,13 @@ public class Model {
 
     private final HashMap<String, ICompany> companies;
 
-    private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
+    // private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
 
     @Autowired
     public Model(HashMap<String, ICompany> companies, WebClient.Builder builder) {
         this.companies = companies;
         this.builder = builder;
     }
-
-    public void addBestCustomer(String customer, ArrayList<Ticket> tickets) {
-        if (bestCustomersList.containsKey(customer))
-            bestCustomersList.put(customer, tickets.size() + bestCustomersList.get(customer));
-        else
-            bestCustomersList.put(customer, tickets.size());
-    }
-
-//    /**
-//     * Add the given booking to the list of kept bookings.
-//     * @param booking: the {@link Booking} to be added.
-//     */
-//    // TODO remove this?
-//    @Deprecated
-//    public void addBooking(Booking booking) {
-//        ApiFuture<WriteResult> future = db.collection("Bookings").document("booking_" + booking.getId()).set(booking);
-//        try {
-//            System.out.println("Update time : " + future.get().getUpdateTime());
-//        } catch (InterruptedException | ExecutionException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     /**
      * Fetch all shows from the API-endpoint.
@@ -82,14 +60,6 @@ public class Model {
 
         return allShows;
     }
-
-//    private Show getShowFromSnap(DocumentSnapshot snap) {
-//        String showName = snap.get("name").toString();
-//        String location = snap.get("location").toString();
-//        String image = snap.get("image").toString();
-//        UUID showId = mapToUUID(snap.get("showId"));
-//        return new Show(Application.localCompanyName, showId, showName, location, image);
-//    }
 
     /**
      * Fetch a {@link Show} given the company name and the showId.
@@ -239,6 +209,18 @@ public class Model {
         // TODO: return the best customer (highest number of tickets, return all of them if multiple customers have an equal amount)
         // Source: https://stackoverflow.com/a/11256352
         HashSet<String> bestCustomers = new HashSet<>();
+        HashMap<String, Integer> bestCustomersList = new HashMap<>();
+        try {
+            List<QueryDocumentSnapshot> customers = db.collection(Application.bestCustomersCollectionName).get().get().getDocuments();
+            for (DocumentSnapshot c: customers) {
+                String customer = c.getId().replaceAll("\"", "");
+                int n_tickets = Math.toIntExact(c.getLong("n_tickets"));
+                bestCustomersList.put(customer, n_tickets);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
         if (bestCustomersList.isEmpty()) return null;
         int maxValueInMap=(Collections.max(bestCustomersList.values()));  // This will return max value in the HashMap
         for (Map.Entry<String, Integer> entry : bestCustomersList.entrySet()) {  // Iterate through HashMap
@@ -246,6 +228,7 @@ public class Model {
                 bestCustomers.add(entry.getKey());
             }
         }
+
         return bestCustomers;
     }
 

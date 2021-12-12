@@ -45,7 +45,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             try {
                 getKeys();
                 DecodedJWT jwt= JWT.decode(session.getValue());
-                System.out.println("JWT: " + jwt.getHeader());
+                // System.out.println("JWT: " + jwt.getHeader());
                 var kid = jwt.getKeyId();
 
                 String role = jwt.getClaim("role").asString();
@@ -56,8 +56,8 @@ public class SecurityFilter extends OncePerRequestFilter {
                 user = new User(mail, role);
 
             } catch (JWTDecodeException e) {
-                System.out.println(e);
-                System.out.println("decode-exception");
+//                System.out.println(e);
+//                System.out.println("decode-exception");
                 user = new User("", "");
             }
 
@@ -86,8 +86,8 @@ public class SecurityFilter extends OncePerRequestFilter {
             while ((inputLine = in.readLine()) != null) {
                 content.append(inputLine);
             }
-            System.out.println("GET request contents: " + content);
-            System.out.println("GET request status: " +  status);
+//            System.out.println("GET request contents: " + content);
+//            System.out.println("GET request status: " +  status);
             in.close();
         } catch (IOException e) {
             System.out.println(e);
