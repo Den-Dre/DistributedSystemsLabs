@@ -61,6 +61,7 @@ public class LocalCompany implements ICompany {
         return times;
     }
 
+    // TODO: get the AVAILABLE seats
     public List<Seat> getAvailableSeats(UUID showId, LocalDateTime time, WebClient.Builder builder) {
         Query query = db.collection(Application.localShowCollectionName).document(showId.toString()).collection(Application.seatsCollectionName).whereEqualTo("time", time);
         ApiFuture<QuerySnapshot> querySnapshot = query.get();
@@ -78,7 +79,6 @@ public class LocalCompany implements ICompany {
         return seats;
     }
 
-    // TODO: test this method (can only be done after getAvailableSeats)
     public Seat getSeat(UUID showId, UUID seatId, WebClient.Builder builder) {
         Seat seat = null;
 

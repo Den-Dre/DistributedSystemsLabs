@@ -51,9 +51,6 @@ public class Application {
 
     private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
-//    @Autowired
-//    private final WebClient.Builder webClientBuilder = WebClient.builder();
-
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         System.setProperty("server.port", System.getenv().getOrDefault("PORT", "8080"));
@@ -126,6 +123,7 @@ public class Application {
 
             try {
                 fs.collection(localShowCollectionName).document(showId.toString()).set(show).get();
+                // Each seat is now a document. (Instead of all seats in one document called "seats" which is in the collection called "seats")
                 for (Seat s: seatsList) {
                     fs.collection(localShowCollectionName).document(showId.toString()).collection(seatsCollectionName).document(s.getSeatId().toString()).set(s).get();
                 }

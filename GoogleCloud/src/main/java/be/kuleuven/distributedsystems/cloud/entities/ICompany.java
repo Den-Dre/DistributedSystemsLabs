@@ -8,6 +8,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static be.kuleuven.distributedsystems.cloud.Model.getLocalDateTime;
+
 @Component
 public interface ICompany {
      Show getShow(UUID showID, WebClient.Builder builder);
@@ -40,15 +42,7 @@ public interface ICompany {
     }
 
     default LocalDateTime getTimeFromHashMap(HashMap<String, Object> timeMap) {
-        return LocalDateTime.of(
-                Math.toIntExact((long) timeMap.get("year")),
-                Math.toIntExact((long) timeMap.get("monthValue")),
-                Math.toIntExact((long) timeMap.get("dayOfMonth")),
-                Math.toIntExact((long) timeMap.get("hour")),
-                Math.toIntExact((long) timeMap.get("minute")),
-                Math.toIntExact((long) timeMap.get("second")),
-                Math.toIntExact((long) timeMap.get("nano"))
-        );
+        return getLocalDateTime(timeMap);
     }
 
     default Seat getSeatFromSnap(DocumentSnapshot snap) {

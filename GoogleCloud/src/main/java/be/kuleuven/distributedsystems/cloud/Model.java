@@ -1,7 +1,6 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
-import com.google.api.core.ApiFuture;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.grpc.GrpcTransportChannel;
@@ -158,19 +157,19 @@ public class Model {
      * @return bookings: a list of bookings made by the given {@code customer}
      */
     public List<Booking> getBookings(String customer) {
-        // Take the delay of the Pub Sub into account
+        List<Booking> bookings = new ArrayList<>();
         try {
+            // Take the delay of the Pub Sub into account
             TimeUnit.MILLISECONDS.sleep(RETRY_DELAY/2);
-        } catch (InterruptedException e) {
+            // Get all the bookings of the customer from firestore
+            QuerySnapshot snapshot = db.collection("Bookings").whereEqualTo("customer", customer).get().get();
+            for (DocumentSnapshot bookingSnap : snapshot.getDocuments()) {
+                bookings.add(bookingFromSnap(bookingSnap));
+            }
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-        var bookings = getAllBookings();
-        System.out.println("Current customer: " + customer);
-        bookings.forEach(b -> System.out.println("Booking x of Model.bookings: " + b.getCustomer()));
-        return bookings
-                .stream()
-                .filter(b -> b.getCustomer().equals(customer))
-                .collect(Collectors.toCollection(ArrayList::new));
+        return bookings;
     }
 
     /**
@@ -179,46 +178,52 @@ public class Model {
      */
     @SuppressWarnings("unchecked")
     public List<Booking> getAllBookings() {
-        CollectionReference reference = db.collection("Bookings");
-        System.out.println("Get all bookings: ");
-        reference.listDocuments().forEach(System.out::println);
-        QuerySnapshot snapshot = null;
+        List<Booking> bookings = new ArrayList<>();
         try {
-            snapshot = db.collection("Bookings").get().get();
-
-        } catch (InterruptedException | ExecutionException e) {
+            // Retrieve the bookings
+            QuerySnapshot snapshot = db.collection("Bookings").get().get();
+            // Loop over all the bookings from firestore
+            for (DocumentSnapshot bookingSnap : snapshot.getDocuments()) {
+                bookings.add(bookingFromSnap(bookingSnap));
+            }
+        } catch (InterruptedException | ExecutionException | NullPointerException e) {
             e.printStackTrace();
         }
-        assert snapshot != null;
-        List<Booking> bookings = new ArrayList<>();
-        for (QueryDocumentSnapshot snap : snapshot.getDocuments()) {
-            System.out.println("Customer from snapshot" + snap.get("customer"));
-            UUID id = mapToUUID(snap.get("id"));
-            Map<String, Object> timesnap = (Map<String, Object>) snap.get("time");
-            LocalDateTime time = LocalDateTime.of(
-                    Math.toIntExact((long) timesnap.get("year")),
-                    Math.toIntExact((long) timesnap.get("monthValue")),
-                    Math.toIntExact((long) timesnap.get("dayOfMonth")),
-                    Math.toIntExact((long) timesnap.get("hour")),
-                    Math.toIntExact((long) timesnap.get("minute")),
-                    Math.toIntExact((long) timesnap.get("second")),
-                    Math.toIntExact((long) timesnap.get("nano"))
-                    );
-            ArrayList<Ticket> tickets = new ArrayList<>();
-            for (Map<String, Object> map : (ArrayList<Map<String, Object>>) Objects.requireNonNull(snap.get("tickets"))) {
-                map.entrySet().forEach(System.out::println);
-                String company = (String) map.get("company");
-                String customer = (String) map.get("customer");
-                UUID seatId = mapToUUID(map.get("seatId"));
-                UUID showId = mapToUUID(map.get("showId"));
-                UUID ticketId = mapToUUID(map.get("ticketId"));
-                tickets.add(new Ticket(company, showId, seatId, ticketId, customer));
-            }
-
-            String customer = (String) snap.get("customer");
-            bookings.add(new Booking(id, time, tickets, customer));
-        }
         return bookings;
+    }
+
+    private Ticket mapToTicket(Map<String, Object> ticketMap) {
+        String company = (String) ticketMap.get("company");
+        String customer = (String) ticketMap.get("customer");
+        UUID seatId = mapToUUID(ticketMap.get("seatId"));
+        UUID showId = mapToUUID(ticketMap.get("showId"));
+        UUID ticketId = mapToUUID(ticketMap.get("ticketId"));
+        return new Ticket(company, showId, seatId, ticketId, customer);
+    }
+
+    private Booking bookingFromSnap(DocumentSnapshot snap) {
+        UUID id = mapToUUID(snap.get("id"));
+        LocalDateTime time = getLocalDateTime((Map<String, Object>) snap.get("time"));
+
+        ArrayList<Ticket> tickets = new ArrayList<>();
+        for (Map<String, Object> map : (ArrayList<Map<String, Object>>) snap.get("tickets")) {
+            tickets.add(mapToTicket(map));
+        }
+
+        String customer = (String) snap.get("customer");
+        return new Booking(id, time, tickets, customer);
+    }
+
+    public static LocalDateTime getLocalDateTime(Map<String, Object> timeMap) {
+        return LocalDateTime.of(
+                Math.toIntExact((long) timeMap.get("year")),
+                Math.toIntExact((long) timeMap.get("monthValue")),
+                Math.toIntExact((long) timeMap.get("dayOfMonth")),
+                Math.toIntExact((long) timeMap.get("hour")),
+                Math.toIntExact((long) timeMap.get("minute")),
+                Math.toIntExact((long) timeMap.get("second")),
+                Math.toIntExact((long) timeMap.get("nano"))
+        );
     }
 
     @SuppressWarnings("unchecked")

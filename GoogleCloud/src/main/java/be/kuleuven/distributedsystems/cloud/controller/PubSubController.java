@@ -70,7 +70,6 @@ public class PubSubController {
             for (Quote q : quotes) {
                  // PubsubMessage.builder and publish
                 String finalAPI_KEY = API_KEY;
-                System.out.println("SeatId in confirmQuote(): " + q.getSeatId());
                 var ticket = builder
                         .baseUrl(String.format("https://%s/", q.getCompany()))
                         .build()
