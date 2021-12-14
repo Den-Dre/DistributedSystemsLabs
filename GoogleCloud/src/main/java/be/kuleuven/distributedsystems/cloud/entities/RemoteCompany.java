@@ -27,6 +27,8 @@ public class RemoteCompany implements ICompany {
 
     private Firestore db;
 
+    public boolean isLocal() {return false;}
+
     public List<Show> getShows(WebClient.Builder builder) {
         boolean succes = false;
         Collection<Show> shows = null;
@@ -202,20 +204,25 @@ public class RemoteCompany implements ICompany {
         return seat;
     }
 
-    public Ticket confirmQuote(Quote q, String customer, String api_key, WebClient.Builder builder) {
-        return builder
-                .baseUrl(String.format("https://%s/", q.getCompany()))
-                .build()
-                .put()
-                .uri(builder2 -> builder2
-                        .pathSegment("shows/{showId}/seats/{seatId}/ticket")
-                        .queryParam("customer", customer)
-                        .queryParam("key", api_key.replaceAll("\"", ""))
-                        .build(q.getShowId().toString(), q.getSeatId().toString()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Ticket>() {
-                })
-                .block();
+    public List<Ticket> confirmQuotes(List<Quote> quotes, String customer, String api_key, WebClient.Builder builder) {
+        List<Ticket> tickets = new ArrayList<>();
+        for (Quote q: quotes) {
+            var ticket = builder
+                    .baseUrl(String.format("https://%s/", q.getCompany()))
+                    .build()
+                    .put()
+                    .uri(builder2 -> builder2
+                            .pathSegment("shows/{showId}/seats/{seatId}/ticket")
+                            .queryParam("customer", customer)
+                            .queryParam("key", api_key.replaceAll("\"", ""))
+                            .build(q.getShowId().toString(), q.getSeatId().toString()))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Ticket>() {
+                    })
+                    .block();
+            tickets.add(ticket);
+        }
+        return tickets;
     }
 
     // Remove made bookings due to a duplicate booking being present in the list
