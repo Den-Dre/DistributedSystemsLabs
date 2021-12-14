@@ -67,12 +67,26 @@ public class PubSubController {
             quotes = (ArrayList<Quote>) SerializationUtils.deserialize(data);
 
             String finalCustomer = customer.replaceAll("\"", "");
-            for (Quote q : quotes) {
-                 // PubsubMessage.builder and publish
-                ICompany company = companies.get(q.getCompany());
-                var ticket = company.confirmQuote(q, customer, API_KEY, builder);
-                successfulTickets.add(ticket);
-            }
+
+
+            // Confirm all the quotes of the remote companies
+            List<Quote> remoteQuotes = quotes.stream().filter(q -> !companies.get(q.getCompany()).isLocal()).collect(Collectors.toList());
+            if (!remoteQuotes.isEmpty())
+                successfulTickets.addAll(companies.get(remoteQuotes.get(0).getCompany()).confirmQuotes(remoteQuotes, customer, API_KEY, builder));
+
+            // Confirm all the quotes of the local companies: we do this because we can put them all into a transaction
+            List<Quote> localQuotes = quotes.stream().filter(q -> companies.get(q.getCompany()).isLocal()).collect(Collectors.toList());
+            if (!localQuotes.isEmpty())
+                successfulTickets.addAll(companies.get(localQuotes.get(0).getCompany()).confirmQuotes(localQuotes, customer, API_KEY, builder));
+
+
+//            for (Quote q : quotes) {
+//                 // PubsubMessage.builder and publish
+//                ICompany company = companies.get(q.getCompany());
+//                var ticket = company.confirmQuote(q, customer, API_KEY, builder);
+//                successfulTickets.add(ticket);
+//            }
+
 
             ArrayList<Ticket> tickets = quotes.stream().map(
                     quote -> new Ticket(quote.getCompany(), quote.getShowId(), quote.getSeatId(), UUID.randomUUID(), finalCustomer)

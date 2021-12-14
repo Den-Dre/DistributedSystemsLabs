@@ -21,6 +21,8 @@ public class LocalCompany implements ICompany {
     private final Map<String, Object> bookSeatMap = Collections.singletonMap("booked", true);
     private final Map<String, Object> unbookSeatMap = Collections.singletonMap("booked", false);
 
+    public boolean isLocal() {return true;}
+
     public List<Show> getShows(WebClient.Builder builder) {
         List<Show> allShows = new ArrayList<>();
         try {
@@ -102,22 +104,57 @@ public class LocalCompany implements ICompany {
         return seat;
     }
 
-    public Ticket confirmQuote(Quote q, String customer, String api_key, WebClient.Builder builder) throws Exception {
-        DocumentReference seatRef = db.collection(Application.localShowCollectionName)
-                .document(q.getShowId().toString())
-                .collection(Application.seatsCollectionName)
-                .document(q.getSeatId().toString());
+    public List<Ticket> confirmQuotes(List<Quote> quotes, String customer, String api_key, WebClient.Builder builder) throws Exception {
+        List<DocumentReference> seatRefs = new ArrayList<>();
+        for (Quote q: quotes) {
+            seatRefs.add(db.collection(Application.localShowCollectionName)
+                    .document(q.getShowId().toString())
+                    .collection(Application.seatsCollectionName)
+                    .document(q.getSeatId().toString()));
+        }
 
-        DocumentSnapshot seatSnap = seatRef.get().get();
-        Boolean alreadyBooked = seatSnap.getBoolean("booked");
+        // DocumentSnapshot seatSnap = seatRef.get().get();
+        // Boolean alreadyBooked = seatSnap.getBoolean("booked");
         // If the seat is booked throw an error
-        if (Boolean.TRUE.equals(alreadyBooked))
-            throw new Exception("Double booking in LocalCompany");
+//        if (Boolean.TRUE.equals(alreadyBooked))
+//            throw new Exception("Double booking in LocalCompany");
 
         // Book the seat
-        seatRef.update(bookSeatMap).get();
+        // seatRef.update(bookSeatMap).get();
         // TODO: is it correct to use UUID.randomUUID()?
-        return new Ticket(q.getCompany(), q.getShowId(), q.getSeatId(), UUID.randomUUID(), customer);
+
+        ApiFuture<Void> futureTransaction = db.runTransaction(transaction -> {
+            // retrieve document and increment population field
+            // 1. Loop over seatRefs to read all the seats
+            List<DocumentSnapshot> snaps = new ArrayList<>();
+            for (DocumentReference seatRef: seatRefs) {
+                snaps.add(transaction.get(seatRef).get());
+            }
+
+            // 2. check if all the loaded seats are not booked
+            for (DocumentSnapshot seat: snaps) {
+                Boolean alreadyBooked = seat.getBoolean("booked");
+
+                if (Boolean.TRUE.equals(alreadyBooked))
+                    throw new Exception("Double booking in LocalCompany");
+            }
+
+            // 3. Loop over all the seats to book them
+            for (DocumentReference seatRef: seatRefs) {
+                transaction.update(seatRef, "booked", true);
+            }
+
+            return null;
+        });
+
+        futureTransaction.get();
+
+        List<Ticket> tickets = new ArrayList<>();
+        for (Quote q: quotes) {
+            tickets.add(new Ticket(q.getCompany(), q.getShowId(), q.getSeatId(), UUID.randomUUID(), customer));
+        }
+
+        return tickets;
     }
 
     public void undoBooking(Ticket t, String API_KEY, WebClient.Builder builder) {
