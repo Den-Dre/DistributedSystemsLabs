@@ -73,7 +73,7 @@ public class APIController {
             }
 
             ProjectSubscriptionName subscriptionName =
-                    ProjectSubscriptionName.of("demo-distributed-systems-kul", "testSubscriptionID");
+                    ProjectSubscriptionName.of("demo-distributed-systems-kul", "subscriptionID");
             Subscription subscription;
             try {
 //                if (subscriptionAdminClient.getSubscription(subscriptionName) == null)

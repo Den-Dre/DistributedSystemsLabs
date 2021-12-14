@@ -38,7 +38,7 @@ import java.util.concurrent.ExecutionException;
 @SpringBootApplication
 public class Application {
 
-    public static final String TOPIC = "ABCDEFGH";
+    public static final String TOPIC = "DS-PubSub";
     public static Firestore firestore;
     public final static String localShowCollectionName = "LocalShows";
 
@@ -182,8 +182,10 @@ public class Application {
 
 //    public FirestoreOptions.Builder setEmulatorHost(String emulatorHost) {}
 
+    // https://distributedsystemspart2.ew.r.appspot.com
+    
     @Bean
-    public boolean isProduction() {
+    public static boolean isProduction() {
         return Objects.equals(System.getenv("GAE_ENV"), "standard");
     }
 
@@ -214,6 +216,18 @@ public class Application {
     @Bean
     public static Firestore db() {
         // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
+        if (isProduction()) {
+            return FirestoreOptions.newBuilder()
+                    .setProjectId("demo-distributed-systems-kul")
+                    .setChannelProvider(
+                            InstantiatingGrpcChannelProvider.newBuilder().setEndpoint("localhost:8084")
+                                    .setChannelConfigurator(
+                                            ManagedChannelBuilder::usePlaintext
+                                    ).build())
+                    .setCredentialsProvider(FixedCredentialsProvider.create(new FakeCreds()))
+                    .build()
+                    .getService();
+        }
         return FirestoreOptions.newBuilder()
                 .setProjectId("demo-distributed-systems-kul")
                 .setChannelProvider(

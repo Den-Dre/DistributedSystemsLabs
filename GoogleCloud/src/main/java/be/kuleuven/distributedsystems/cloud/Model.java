@@ -37,6 +37,9 @@ public class Model {
     @Resource(name = "db")
     private Firestore db;
 
+    @Resource(name = "isProduction")
+    private boolean isProduction;
+
     private final HashMap<String, ICompany> companies;
 
     // private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
@@ -244,6 +247,12 @@ public class Model {
         // source https://cloud.google.com/pubsub/docs/emulator#accessing_environment_variables
         // Use localhost of emulator instead of real endpoint!
         String hostport = "localhost:8083";
+        // TODO: change pubsub endpoint to real url
+        if (isProduction) {
+            System.out.println("isProduction in confirmquotes model");
+            hostport = "";
+        }
+
         ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
 
         Publisher publisher = null;
