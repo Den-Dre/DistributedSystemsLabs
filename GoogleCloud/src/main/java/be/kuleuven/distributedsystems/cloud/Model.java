@@ -40,6 +40,9 @@ public class Model {
     @Resource(name = "isProduction")
     private boolean isProduction;
 
+    @Resource(name = "applicationURL")
+    private String applicationURL;
+
     private final HashMap<String, ICompany> companies;
 
     // private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
@@ -249,24 +252,24 @@ public class Model {
         String hostport = "localhost:8083";
         // TODO: change pubsub endpoint to real url
         if (isProduction) {
-            System.out.println("isProduction in confirmquotes model");
-            hostport = "";
+            System.out.println("isProduction in confirmquotes model: " + applicationURL);
+            hostport = applicationURL;
         }
 
-        ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
+        // ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
 
         Publisher publisher = null;
         try {
-            TransportChannelProvider channelProvider =
-                    FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
-            CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
-            TopicName topicName = TopicName.of("demo-distributed-systems-kul", Application.TOPIC);
+//            TransportChannelProvider channelProvider =
+//                    FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
+//            CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
+            TopicName topicName = TopicName.of(isProduction ? "distributedsystemspart2" : "demo-distributed-systems-kul", Application.TOPIC);
 
             // Set the channel and credentials provider when creating a `Publisher`.
             // Similarly for Subscriber
             publisher = Publisher.newBuilder(topicName)
-                    .setChannelProvider(channelProvider)
-                    .setCredentialsProvider(credentialsProvider)
+//                    .setChannelProvider(channelProvider)
+//                    .setCredentialsProvider(credentialsProvider)
                     .build();
 
             ArrayList<Quote> quotesArray = new ArrayList<>(quotes);
@@ -278,7 +281,7 @@ public class Model {
         } catch (IOException | ExecutionException e) {
             e.printStackTrace();
         } finally {
-            channel.shutdown();
+            //channel.shutdown();
             if (publisher != null) {
                 // When finished with the publisher, shutdown to free up resources.
                 publisher.shutdown();

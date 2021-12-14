@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Component
+//@Component
 public class RemoteCompany implements ICompany {
     protected String company;
     private static final int RETRY_DELAY = 1000;
