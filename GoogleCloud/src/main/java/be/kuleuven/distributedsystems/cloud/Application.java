@@ -55,6 +55,7 @@ public class Application {
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
+        System.out.println("IN MAAAAAAIN");
         System.setProperty("server.port", System.getenv().getOrDefault("PORT", "8080"));
         System.out.println("Running at port " + System.getenv().getOrDefault("PORT", "8080"));
 
@@ -182,8 +183,6 @@ public class Application {
 
 //    public FirestoreOptions.Builder setEmulatorHost(String emulatorHost) {}
 
-    // https://distributedsystemspart2.ew.r.appspot.com
-    
     @Bean
     public static boolean isProduction() {
         return Objects.equals(System.getenv("GAE_ENV"), "standard");
@@ -191,10 +190,15 @@ public class Application {
 
     @Bean
     public String projectId() {
-        return "demo-distributed-systems-kul";
+        return isProduction() ? "distributedsystemspart2" : "demo-distributed-systems-kul";
     }
 
     public String get_API_KEY() { return API_KEY; }
+
+    @Bean
+    public static String applicationURL() {
+        return "https://distributedsystemspart2.ew.r.appspot.com";
+    }
 
     /*
      * You can use this builder to create a Spring WebClient instance which can be used to make REST-calls.
@@ -215,19 +219,17 @@ public class Application {
 
     @Bean
     public static Firestore db() {
-        // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
+        System.out.println("In db(), application url: " + applicationURL());
         if (isProduction()) {
+            System.out.println("In db() in production, application url: " + applicationURL());
+
             return FirestoreOptions.newBuilder()
-                    .setProjectId("demo-distributed-systems-kul")
-                    .setChannelProvider(
-                            InstantiatingGrpcChannelProvider.newBuilder().setEndpoint("localhost:8084")
-                                    .setChannelConfigurator(
-                                            ManagedChannelBuilder::usePlaintext
-                                    ).build())
-                    .setCredentialsProvider(FixedCredentialsProvider.create(new FakeCreds()))
+                    .setProjectId("distributedsystemspart2")
                     .build()
                     .getService();
         }
+        // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
+        System.out.println("In db() outside of production, application url: " + applicationURL());
         return FirestoreOptions.newBuilder()
                 .setProjectId("demo-distributed-systems-kul")
                 .setChannelProvider(

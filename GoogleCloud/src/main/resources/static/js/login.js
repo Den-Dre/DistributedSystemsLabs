@@ -1,10 +1,12 @@
 let firebaseConfig;
 if (location.hostname === "localhost") {
+    console.log("Localhost")
     firebaseConfig = {
         apiKey: "AIzaSyBoLKKR7OFL2ICE15Lc1-8czPtnbej0jWY",
         projectId: "demo-distributed-systems-kul",
     }
 } else {
+    console.log("Remote!!")
     // TODO: (level 2) replace with your own configuration
     firebaseConfig = {
         apiKey: "AIzaSyBbfO9SfQbkTaJB5pg-74DPrBkt6nIApgE",
