@@ -47,7 +47,6 @@ public class PubSubController {
     // https://cloud.google.com/pubsub/docs/troubleshooting#messages
     @PostMapping("/push")
     public ResponseEntity<Void> confirmQuote(@RequestBody String message) throws ParseException {
-        System.out.println("In confirmQuote");
         String customer;
         ArrayList<Quote> quotes;
         ArrayList<Ticket> successfulTickets = new ArrayList<>();
@@ -113,7 +112,8 @@ public class PubSubController {
     public void addBooking(Booking booking) {
         ApiFuture<WriteResult> future = db.collection("Bookings").document("booking_" + booking.getId()).set(booking);
         try {
-            System.out.println("Update time : " + future.get().getUpdateTime());
+            WriteResult result = future.get();
+            //System.out.println("Update time : " + result.getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }

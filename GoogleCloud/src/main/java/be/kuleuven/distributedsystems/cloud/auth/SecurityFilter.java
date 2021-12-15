@@ -3,8 +3,15 @@ package be.kuleuven.distributedsystems.cloud.auth;
 import be.kuleuven.distributedsystems.cloud.entities.Seat;
 import be.kuleuven.distributedsystems.cloud.entities.User;
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.google.api.client.util.IOUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import net.minidev.json.JSONObject;
+import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.eclipse.jetty.websocket.jsr356.annotations.JsrParamIdText;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -30,6 +37,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.security.interfaces.RSAKey;
 import java.util.*;
 
 @Component
@@ -44,10 +53,22 @@ public class SecurityFilter extends OncePerRequestFilter {
         User user;
         if (session != null) {
             try {
-                getKeys();
+                JsonObject googleKeys = getKeys();
                 DecodedJWT jwt= JWT.decode(session.getValue());
                 // System.out.println("JWT: " + jwt.getHeader());
                 var kid = jwt.getKeyId();
+                var signature = jwt.getSignature();
+                System.out.println("kid: " + kid);
+
+                var pubkey = googleKeys.get(kid).getAsString();
+//                Algorithm algorithm = Algorithm.RSA256(pubkey, null);
+//                DecodedJWT jwt1 = JWT.require(algorithm)
+//                                .withIssuer("https://securetoken.google.com/" + "distributedsystemspart2")
+//                                .build()
+//                                .verify(signature);
+
+                System.out.println("public key: " + pubkey);
+                System.out.println("signature: " + signature);
 
                 String role = jwt.getClaim("role").asString();
                 if (!"manager".equals(role))
@@ -72,7 +93,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void getKeys() {
+    private JsonObject getKeys() {
         URL url;
         HttpURLConnection con = null;
         try {
@@ -87,16 +108,21 @@ public class SecurityFilter extends OncePerRequestFilter {
             while ((inputLine = in.readLine()) != null) {
                 content.append(inputLine);
             }
+
+            JsonParser parser = new JsonParser();
+            JsonObject obj  = parser.parse(content.toString()).getAsJsonObject();
+
 //            System.out.println("GET request contents: " + content);
 //            System.out.println("GET request status: " +  status);
             in.close();
+            return obj;
         } catch (IOException e) {
             System.out.println(e);
         } finally {
             if (con != null)
                 con.disconnect();
         }
-
+        return null;
     }
 
     @Override

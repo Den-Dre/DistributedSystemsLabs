@@ -33,77 +33,9 @@ import java.util.concurrent.TimeUnit;
 public class APIController {
     private final Model model;
 
-//    @Resource(name = "applicationURL")
-//    private String applicationURL;
-
     @Autowired
     public APIController(Model model, Boolean isProduction, String applicationURL) {
         this.model = model;
-        System.out.println("isProduction value: " + isProduction);
-        System.out.println("We got in da constructa2!");
-
-//        SubscriptionAdminClient subscriptionAdminClient;
-//
-//        String hostport = "localhost:8083";
-//        if (isProduction) {
-//            System.out.println("Application url: " + applicationURL);
-//            hostport = applicationURL;
-//        }
-//        // ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
-//        try {
-//
-////            TransportChannelProvider channelProvider =
-////                    FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
-////            CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
-//
-//            String pushEndpoint = "http://localhost:8080/push";
-//            if (isProduction) {
-//                pushEndpoint = applicationURL + "/push";
-//            }
-////            PushConfig pushConfig = PushConfig.newBuilder().setPushEndpoint(pushEndpoint).build();
-////            subscriptionAdminClient = SubscriptionAdminClient.create(
-////                    SubscriptionAdminSettings.newBuilder()
-////                            .setCredentialsProvider(credentialsProvider)
-////                            .setTransportChannelProvider(channelProvider)
-////                            .build());
-//
-//            TopicName topicName = TopicName.of(isProduction ? "distributedsystemspart2" : "demo-distributed-systems-kul", Application.TOPIC);
-//            TopicAdminClient topicClient =
-//                    TopicAdminClient.create(
-//                            TopicAdminSettings.newBuilder()
-////                                    .setTransportChannelProvider(channelProvider)
-////                                    .setCredentialsProvider(credentialsProvider)
-//                                    .build());
-//            Topic topic;
-//            try {
-////                if (topicClient.getTopic(topicName) == null)
-////                else
-////                topic = topicClient.getTopic(topicName);
-//                topic = topicClient.createTopic(topicName);
-//                System.out.println("Topic toppie! " + topic.getName());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//
-//            ProjectSubscriptionName subscriptionName =
-//                    ProjectSubscriptionName.of("demo-distributed-systems-kul", "subscriptionID");
-//            Subscription subscription;
-//            try {
-////                if (subscriptionAdminClient.getSubscription(subscriptionName) == null)
-////                else
-////                subscription = subscriptionAdminClient.getSubscription(subscriptionName);
-//                // subscription = subscriptionAdminClient.createSubscription(subscriptionName, topicName, pushConfig, 60);
-//                // System.out.println("Created push subscription: " + subscription.getName());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        finally {
-//            // channel.shutdown();
-//                // When finished with the publisher, shutdown to free up resources.
-//        }
     }
 
     @PostMapping(path = "/addToCart", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
@@ -138,7 +70,6 @@ public class APIController {
     public ResponseEntity<Void> confirmCart(
             @CookieValue(value = "cart", required = false) String cartString) throws Exception {
         List<Quote> cart = Cart.fromCookie(cartString);
-        System.out.println("Got into /confirmCart endpoint");
         this.model.confirmQuotes(new ArrayList<>(cart), AuthController.getUser().getEmail());
         cart.clear();
         ResponseCookie cookie = Cart.toCookie(cart);

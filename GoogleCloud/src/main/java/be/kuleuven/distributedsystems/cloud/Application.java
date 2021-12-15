@@ -27,6 +27,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.HypermediaWebClientConfigurer;
@@ -67,9 +68,7 @@ public class Application {
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
-        System.out.println("IN MAAAAAAIN");
         System.setProperty("server.port", System.getenv().getOrDefault("PORT", "8080"));
-        System.out.println("Running at port " + System.getenv().getOrDefault("PORT", "8080"));
 
         // Apache JSP scans by default all JARs, which is not necessary, so disable it
         System.setProperty(org.apache.tomcat.util.scan.Constants.SKIP_JARS_PROPERTY, "*.jar");
@@ -86,7 +85,7 @@ public class Application {
         try {
             if (db().collection(localShowCollectionName).limit(1).get().get().isEmpty()) {
                 System.out.println("Local shows database is empty: uploading data.json");
-                uploadLocalShows(context);
+                uploadLocalShows();
             }
 
         } catch (InterruptedException | ExecutionException e) {
@@ -96,9 +95,8 @@ public class Application {
 
     private static void initialisePubSub() {
         if (isProduction()) {
-            System.out.println("init pubsub production");
+            System.out.println("Initialising PubSub for Production");
             TopicAdminClient topicClient = null;
-            System.out.println("getting topicname");
             TopicName topicName = TopicName.of("distributedsystemspart2", TOPIC);
             try {
                 topicClient =
@@ -118,6 +116,7 @@ public class Application {
             System.out.println("Topic toppie! " + topic.getName());
 
         } else {
+            System.out.println("Initialising PubSub for Emulator");
             String hostport = "localhost:8083";
             ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
             TransportChannelProvider channelProvider = FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
@@ -173,11 +172,11 @@ public class Application {
         }
     }
 
-    private static void uploadLocalShows(ApplicationContext context) {
+    private static void uploadLocalShows() {
         // Calling db() each time when uploading to firestore caused the weird channel allocation site error
         // Solution -> call it once for the whole method
         Firestore fs = db();
-        String contents = readLocalShows(context);
+        String contents = readLocalShows();
 
         JsonParser parser = new JsonParser();
         JsonObject obj  = parser.parse(contents).getAsJsonObject();
@@ -230,22 +229,28 @@ public class Application {
         }
     }
 
-    private static String readLocalShows(ApplicationContext context)  {
+    private static String readLocalShows()  {
         // Source: https://mkyong.com/spring/spring-resource-loader-with-getresource-example/
-        System.out.println("looking for data.json");
-        Resource resource = context.getResource("classpath:/data.json");
-
-        System.out.println("reading data.json");
+//        System.out.println("looking for data.json");
+//        Resource resource = context.getResource("classpath:/data.json");
+//
+//        System.out.println("reading data.json");
+//        try {
+//            StringBuilder fileContents = new StringBuilder();
+//            InputStream in = resource.getInputStream();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//            String line;
+//            while ((line = reader.readLine()) != null) {
+//                fileContents.append(line);
+//            }
+//            reader.close();
+//            return fileContents.toString();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         try {
-            StringBuilder fileContents = new StringBuilder();
-            InputStream in = resource.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                fileContents.append(line);
-            }
-            reader.close();
-            return fileContents.toString();
+            String data = new String(new ClassPathResource("data.json").getInputStream().readAllBytes());
+            return data;
         } catch (IOException e) {
             e.printStackTrace();
         }
