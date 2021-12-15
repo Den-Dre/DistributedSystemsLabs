@@ -145,6 +145,7 @@ public class Model {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+
         return bookings;
     }
 
@@ -227,6 +228,7 @@ public class Model {
             e.printStackTrace();
         }
 
+
         if (bestCustomersList.isEmpty()) return null;
         int maxValueInMap=(Collections.max(bestCustomersList.values()));  // This will return max value in the HashMap
         for (Map.Entry<String, Integer> entry : bestCustomersList.entrySet()) {  // Iterate through HashMap
@@ -249,39 +251,47 @@ public class Model {
 
         // source https://cloud.google.com/pubsub/docs/emulator#accessing_environment_variables
         // Use localhost of emulator instead of real endpoint!
-        String hostport = "localhost:8083";
-        // TODO: change pubsub endpoint to real url
-        if (isProduction) {
-            System.out.println("isProduction in confirmquotes model: " + applicationURL);
-            hostport = applicationURL;
-        }
 
-        // ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
+        TopicName topicName = TopicName.of(isProduction ? "distributedsystemspart2" : "demo-distributed-systems-kul", Application.TOPIC);
 
         Publisher publisher = null;
-        try {
-//            TransportChannelProvider channelProvider =
-//                    FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
-//            CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
-            TopicName topicName = TopicName.of(isProduction ? "distributedsystemspart2" : "demo-distributed-systems-kul", Application.TOPIC);
+        ManagedChannel channel = null;
+        TransportChannelProvider channelProvider = null;
+        CredentialsProvider credentialsProvider = null;
+        if (!isProduction) {
+            String hostport = "localhost:8083";
+            channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
+            channelProvider = FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
+            credentialsProvider = NoCredentialsProvider.create();
+        }
 
+        try {
             // Set the channel and credentials provider when creating a `Publisher`.
             // Similarly for Subscriber
-            publisher = Publisher.newBuilder(topicName)
-//                    .setChannelProvider(channelProvider)
-//                    .setCredentialsProvider(credentialsProvider)
-                    .build();
+            if (isProduction) {
+                publisher = Publisher.newBuilder(topicName)
+                        .build();
+            } else {
+                publisher = Publisher.newBuilder(topicName)
+                        .setChannelProvider(channelProvider)
+                        .setCredentialsProvider(credentialsProvider)
+                        .build();
+            }
 
             ArrayList<Quote> quotesArray = new ArrayList<>(quotes);
             byte[] quotesSerialized = SerializationUtils.serialize(quotesArray);
             ByteString data = ByteString.copyFrom(quotesSerialized);
+
             PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAttributes("customer", customer).putAttributes("apiKey", API_KEY).build();
             // if we don't add this .get(), the finally clause gets executed before the message is sent: apiFuture.get() is a blocking call!
             publisher.publish(pubsubMessage).get();
+
         } catch (IOException | ExecutionException e) {
             e.printStackTrace();
         } finally {
-            //channel.shutdown();
+            if (channel != null) {
+                channel.shutdown();
+            }
             if (publisher != null) {
                 // When finished with the publisher, shutdown to free up resources.
                 publisher.shutdown();

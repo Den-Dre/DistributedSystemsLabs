@@ -1,52 +1,26 @@
 This is the Google Pub/Sub fake.
 Implementation may be incomplete or differ from the real system.
-Dec 14, 2021 10:44:34 AM com.google.cloud.pubsub.testing.v1.Main main
+Dec 15, 2021 7:08:06 PM com.google.cloud.pubsub.testing.v1.Main main
 INFO: IAM integration is disabled. IAM policy methods and ACL checks are not supported
-Dec 14, 2021 10:44:35 AM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround
+Dec 15, 2021 7:08:07 PM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround
 INFO: Applied Java 7 long hostname workaround.
-Dec 14, 2021 10:44:35 AM com.google.cloud.pubsub.testing.v1.Main main
+Dec 15, 2021 7:08:07 PM com.google.cloud.pubsub.testing.v1.Main main
 INFO: Server started, listening on 8083
-Dec 14, 2021 10:44:36 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 15, 2021 7:08:07 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 10:45:02 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 15, 2021 7:08:28 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 10:45:02 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 15, 2021 7:08:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 14, 2021 10:46:41 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 15, 2021 7:08:51 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 10:46:41 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 15, 2021 7:08:51 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 14, 2021 11:35:52 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 15, 2021 7:09:13 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 11:35:52 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 15, 2021 7:09:13 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 14, 2021 11:41:49 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 15, 2021 7:09:39 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 11:41:49 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 15, 2021 7:09:39 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 14, 2021 11:42:55 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
-INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 11:42:55 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
-Dec 14, 2021 12:22:42 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
-INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 12:22:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
-Dec 14, 2021 12:23:15 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
-INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 12:23:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
-Dec 14, 2021 12:24:49 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
-INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 12:24:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
-Dec 14, 2021 12:25:03 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
-INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 12:25:03 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
-Dec 14, 2021 12:26:06 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
-INFO: Adding handler(s) to newly registered Channel.
-Dec 14, 2021 12:26:06 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
-*** shutting down gRPC server since JVM is shutting down
-*** server shut down

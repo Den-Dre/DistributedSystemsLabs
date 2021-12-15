@@ -8,7 +8,6 @@
 /home/martijn/Dropbox/1eMast/1eSem/Distributed_Systems/Labo/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/entities/RemoteCompany.java
 /home/martijn/Dropbox/1eMast/1eSem/Distributed_Systems/Labo/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/controller/AuthController.java
 /home/martijn/Dropbox/1eMast/1eSem/Distributed_Systems/Labo/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/controller/Cart.java
-/home/martijn/Dropbox/1eMast/1eSem/Distributed_Systems/Labo/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/entities/CompanyInterface.java
 /home/martijn/Dropbox/1eMast/1eSem/Distributed_Systems/Labo/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/entities/Ticket.java
 /home/martijn/Dropbox/1eMast/1eSem/Distributed_Systems/Labo/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/auth/SecurityFilter.java
 /home/martijn/Dropbox/1eMast/1eSem/Distributed_Systems/Labo/DistributedSystemsLabs/GoogleCloud/src/main/java/be/kuleuven/distributedsystems/cloud/Application.java

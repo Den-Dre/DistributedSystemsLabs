@@ -43,7 +43,7 @@ public class LocalCompany implements ICompany {
         Show show = null;
         try {
             for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
-                System.out.println("Show retrieved: " + document.get("name"));
+                // System.out.println("Show retrieved: " + document.get("name"));
                 show = getShowFromSnap(document);
 
             }

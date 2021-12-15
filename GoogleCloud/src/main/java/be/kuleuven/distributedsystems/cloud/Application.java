@@ -1,20 +1,33 @@
 package be.kuleuven.distributedsystems.cloud;
 
 import be.kuleuven.distributedsystems.cloud.entities.*;
+import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.api.gax.core.NoCredentialsProvider;
+import com.google.api.gax.grpc.GrpcTransportChannel;
 import com.google.api.gax.grpc.InstantiatingGrpcChannelProvider;
+import com.google.api.gax.rpc.FixedTransportChannelProvider;
+import com.google.api.gax.rpc.NotFoundException;
+import com.google.api.gax.rpc.TransportChannelProvider;
 import com.google.auth.Credentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.cloud.pubsub.v1.SubscriptionAdminClient;
+import com.google.cloud.pubsub.v1.SubscriptionAdminSettings;
+import com.google.cloud.pubsub.v1.TopicAdminClient;
+import com.google.cloud.pubsub.v1.TopicAdminSettings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.pubsub.v1.*;
+import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.HypermediaWebClientConfigurer;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -23,9 +36,7 @@ import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import javax.annotation.Resource;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,6 +64,7 @@ public class Application {
 
     private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
 
+
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         System.out.println("IN MAAAAAAIN");
@@ -69,10 +81,12 @@ public class Application {
         // Check whether local shows are present in Firestore
         // Query all local shows
 
+        initialisePubSub();
+
         try {
             if (db().collection(localShowCollectionName).limit(1).get().get().isEmpty()) {
                 System.out.println("Local shows database is empty: uploading data.json");
-                uploadLocalShows();
+                uploadLocalShows(context);
             }
 
         } catch (InterruptedException | ExecutionException e) {
@@ -80,11 +94,90 @@ public class Application {
         }
     }
 
-    private static void uploadLocalShows() {
+    private static void initialisePubSub() {
+        if (isProduction()) {
+            System.out.println("init pubsub production");
+            TopicAdminClient topicClient = null;
+            System.out.println("getting topicname");
+            TopicName topicName = TopicName.of("distributedsystemspart2", TOPIC);
+            try {
+                topicClient =
+                        TopicAdminClient.create(
+                                TopicAdminSettings.newBuilder()
+                                        .build());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Topic topic;
+            try {
+                topic = topicClient.getTopic(topicName);
+            } catch (NotFoundException e) {
+                topic = topicClient.createTopic(topicName);
+            }
+            System.out.println("Topic toppie! " + topic.getName());
+
+        } else {
+            String hostport = "localhost:8083";
+            ManagedChannel channel = ManagedChannelBuilder.forTarget(hostport).usePlaintext().build();
+            TransportChannelProvider channelProvider = FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
+            CredentialsProvider credentialsProvider = NoCredentialsProvider.create();
+
+            String pushEndpoint = "http://localhost:8080/push";
+
+            // 1. Make the push config
+            PushConfig pushConfig = PushConfig.newBuilder().setPushEndpoint(pushEndpoint).build();
+
+            SubscriptionAdminClient subscriptionAdminClient = null;
+            try {
+                subscriptionAdminClient = SubscriptionAdminClient.create(
+                        SubscriptionAdminSettings.newBuilder()
+                                .setCredentialsProvider(credentialsProvider)
+                                .setTransportChannelProvider(channelProvider)
+                                .build());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            TopicName topicName = TopicName.of("demo-distributed-systems-kul", TOPIC);
+            TopicAdminClient topicClient = null;
+            try {
+                topicClient = TopicAdminClient.create(
+                        TopicAdminSettings.newBuilder()
+                                .setTransportChannelProvider(channelProvider)
+                                .setCredentialsProvider(credentialsProvider)
+                                .build());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            Topic topic;
+            try {
+                topic = topicClient.getTopic(topicName);
+            } catch (NotFoundException e) {
+                topic = topicClient.createTopic(topicName);
+            }
+            // System.out.println("Using this topic: " + topic.getName());
+
+            ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of("demo-distributed-systems-kul", "subscriptionID");
+            Subscription subscription;
+            // Try to fetch the subscription, if it does not exist: create it
+            try {
+                subscription = subscriptionAdminClient.getSubscription(subscriptionName);
+            } catch (NotFoundException e) {
+                subscription = subscriptionAdminClient.createSubscription(subscriptionName, topicName, pushConfig, 10);
+            }
+            // System.out.println("Using following push subscription: " + subscription.getName());
+            channel.shutdownNow();
+        }
+    }
+
+    private static void uploadLocalShows(ApplicationContext context) {
         // Calling db() each time when uploading to firestore caused the weird channel allocation site error
         // Solution -> call it once for the whole method
         Firestore fs = db();
-        String contents = readLocalShows();
+        String contents = readLocalShows(context);
 
         JsonParser parser = new JsonParser();
         JsonObject obj  = parser.parse(contents).getAsJsonObject();
@@ -137,15 +230,26 @@ public class Application {
         }
     }
 
-    private static String readLocalShows()  {
-        String fileContents = null;
-        String classPath = new File("").getAbsolutePath();
+    private static String readLocalShows(ApplicationContext context)  {
+        // Source: https://mkyong.com/spring/spring-resource-loader-with-getresource-example/
+        System.out.println("looking for data.json");
+        Resource resource = context.getResource("classpath:/data.json");
+
+        System.out.println("reading data.json");
         try {
-            fileContents = Files.readString(Path.of(classPath + "/src/main/resources/data.json"));
+            StringBuilder fileContents = new StringBuilder();
+            InputStream in = resource.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                fileContents.append(line);
+            }
+            reader.close();
+            return fileContents.toString();
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
-        return fileContents;
+        return null;
     }
 
     private static class FakeCreds extends Credentials {
@@ -219,28 +323,27 @@ public class Application {
 
     @Bean
     public static Firestore db() {
-        System.out.println("In db(), application url: " + applicationURL());
         if (isProduction()) {
-            System.out.println("In db() in production, application url: " + applicationURL());
-
             return FirestoreOptions.newBuilder()
                     .setProjectId("distributedsystemspart2")
                     .build()
                     .getService();
         }
         // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
-        System.out.println("In db() outside of production, application url: " + applicationURL());
         return FirestoreOptions.newBuilder()
                 .setProjectId("demo-distributed-systems-kul")
-                .setChannelProvider(
-                        InstantiatingGrpcChannelProvider.newBuilder().setEndpoint("localhost:8084")
-                                .setChannelConfigurator(
-                                        ManagedChannelBuilder::usePlaintext
-                                ).build())
+                .setChannelProvider(channelProvider)
                 .setCredentialsProvider(FixedCredentialsProvider.create(new FakeCreds()))
                 .build()
                 .getService();
     }
+
+    private static final InstantiatingGrpcChannelProvider channelProvider =
+            InstantiatingGrpcChannelProvider
+            .newBuilder()
+            .setEndpoint("localhost:8084")
+            .setChannelConfigurator(ManagedChannelBuilder::usePlaintext)
+            .build();
 
     @Bean
     HashMap<String, ICompany> companies() {

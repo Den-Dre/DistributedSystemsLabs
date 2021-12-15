@@ -5,6 +5,7 @@ import be.kuleuven.distributedsystems.cloud.entities.User;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.eclipse.jetty.websocket.jsr356.annotations.JsrParamIdText;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
