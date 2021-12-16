@@ -59,3 +59,5 @@ java.net.SocketException: Connection reset
 	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
 	at java.base/java.lang.Thread.run(Thread.java:832)
 
+*** shutting down gRPC server since JVM is shutting down
+*** server shut down

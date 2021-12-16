@@ -1,21 +1,16 @@
 package be.kuleuven.distributedsystems.cloud.auth;
 
-import be.kuleuven.distributedsystems.cloud.entities.Seat;
 import be.kuleuven.distributedsystems.cloud.entities.User;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.google.api.client.util.IOUtils;
-import com.google.gson.Gson;
+import com.google.api.gax.rpc.UnauthenticatedException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minidev.json.JSONObject;
 import org.bouncycastle.asn1.pkcs.RSAPublicKey;
-import org.eclipse.jetty.websocket.jsr356.annotations.JsrParamIdText;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,16 +25,14 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.security.interfaces.RSAKey;
-import java.util.*;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -54,21 +47,43 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (session != null) {
             try {
                 JsonObject googleKeys = getKeys();
-                DecodedJWT jwt= JWT.decode(session.getValue());
+
+                DecodedJWT idToken = JWT.decode(session.getValue());
                 // System.out.println("JWT: " + jwt.getHeader());
-                var kid = jwt.getKeyId();
-                var signature = jwt.getSignature();
-                System.out.println("kid: " + kid);
+                var kid = idToken.getKeyId();
+
+                // System.out.println("kid: " + kid);
 
                 var pubkey = googleKeys.get(kid).getAsString();
-//                Algorithm algorithm = Algorithm.RSA256(pubkey, null);
-//                DecodedJWT jwt1 = JWT.require(algorithm)
-//                                .withIssuer("https://securetoken.google.com/" + "distributedsystemspart2")
-//                                .build()
-//                                .verify(signature);
+                // Trying to do the parsing as done here:
+                // https://stackoverflow.com/questions/9739121/convert-a-pem-formatted-string-to-a-java-security-cert-x509certificate
 
-                System.out.println("public key: " + pubkey);
-                System.out.println("signature: " + signature);
+                java.security.interfaces.RSAPublicKey publicKey = null;
+                try {
+                    X509Certificate cert = convertStringToX509Cert(pubkey);
+
+                    publicKey = (java.security.interfaces.RSAPublicKey) cert.getPublicKey();
+                    // System.out.println("Public key: " + publicKey);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                DecodedJWT jwt = null;
+                try {
+                    Algorithm algorithm = Algorithm.RSA256(publicKey, null);
+                    jwt = JWT.require(algorithm)
+                            .withIssuer("https://securetoken.google.com/" + "distributedsystemspart2")
+                            .build()
+                            .verify(idToken); // This verifies all the claims as mentioned on:
+                    // https://firebase.google.com/docs/auth/admin/verify-id-tokens#verify_id_tokens_using_a_third-party_jwt_library
+                } catch (JWTVerificationException e) {
+                    // Unauthorized
+                    return;
+                }
+
+                // System.out.println("public key: " + pubkey);
+                // System.out.println("signature: " + signature);
 
                 String role = jwt.getClaim("role").asString();
                 if (!"manager".equals(role))
@@ -93,6 +108,13 @@ public class SecurityFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    private X509Certificate convertStringToX509Cert(String certificate) throws Exception{
+        InputStream targetStream = new ByteArrayInputStream(certificate.getBytes());
+        return (X509Certificate) CertificateFactory
+                .getInstance("X509")
+                .generateCertificate(targetStream);
+    }
+
     private JsonObject getKeys() {
         URL url;
         HttpURLConnection con = null;
@@ -108,6 +130,15 @@ public class SecurityFilter extends OncePerRequestFilter {
             while ((inputLine = in.readLine()) != null) {
                 content.append(inputLine);
             }
+//            // replace with builder
+//            builder
+//                    .baseUrl("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
+//                    .build()
+//                    .get()
+//                    .retrieve()
+//                    //.bodyToMono(new ParameterizedTypeReference<Ticket>() {})
+//                    .
+//                    .block();
 
             JsonParser parser = new JsonParser();
             JsonObject obj  = parser.parse(content.toString()).getAsJsonObject();
