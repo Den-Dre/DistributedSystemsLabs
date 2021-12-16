@@ -304,12 +304,10 @@ public class Application {
     @Bean
     public static Firestore db() {
         if (isProduction()) {
-            try {
-                return FirestoreOptions.newBuilder()
-                        .setProjectId("distributedsystemspart2")
-                        .build()
-                        .getService();
-            } catch (Exception ignored) {}
+            return FirestoreOptions.newBuilder()
+                    .setProjectId("distributedsystemspart2")
+                    .build()
+                    .getService();
         }
         // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
         return FirestoreOptions.newBuilder()
