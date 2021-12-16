@@ -9,9 +9,15 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import net.minidev.json.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.SerializationUtils;
@@ -21,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -38,16 +45,19 @@ public class PubSubController {
 
     private final HashMap<String, ICompany> companies;
 
+    private final String sendGridAPIKey = "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";
+
     @Autowired
     public PubSubController(Model model, HashMap<String, ICompany> companies) {
         this.model = model;
         this.companies = companies;
     }
 
+
     // https://cloud.google.com/pubsub/docs/troubleshooting#messages
     @PostMapping("/push")
     public ResponseEntity<Void> confirmQuote(@RequestBody String message) throws ParseException {
-        String customer;
+        String customer = null;
         ArrayList<Quote> quotes;
         ArrayList<Ticket> successfulTickets = new ArrayList<>();
         String API_KEY = null;
@@ -66,6 +76,7 @@ public class PubSubController {
             quotes = (ArrayList<Quote>) SerializationUtils.deserialize(data);
 
             String finalCustomer = customer.replaceAll("\"", "");
+            customer = finalCustomer;
 
 
             // Confirm all the quotes of the remote companies
@@ -93,6 +104,8 @@ public class PubSubController {
             updateBestCustomers(customer, tickets.size());
 
             addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, finalCustomer));
+            sendMail(true, finalCustomer);
+            System.out.println("Mail for successful booking sent to " + finalCustomer);
 
         } catch (Exception e) {
             // Prevent duplicate bookings
@@ -100,6 +113,8 @@ public class PubSubController {
             String finalAPI_KEY = API_KEY;
             // delegate the deletion of tickets to their respective companies
             successfulTickets.forEach(t -> companies.get(t.getCompany()).undoBooking(t, finalAPI_KEY, builder));
+            System.out.println("Sending mail: booking failed, sending to: " + customer);
+            sendMail(false, customer);
             // undoBookings(successfulTicketIDs, API_KEY);
         }
         return new ResponseEntity<>(HttpStatus.OK);
@@ -132,6 +147,33 @@ public class PubSubController {
             e.printStackTrace();
         }
 
+    }
+
+    private void sendMail(Boolean successFullBooking, String recipient) {
+        Email from = new Email("r0760777@kuleuven.be");
+        String subject = successFullBooking
+                ? "Booking confirmation mail"
+                : "Booking did not succeed";
+        Email to = new Email(recipient);
+        String contents = successFullBooking
+                ? "Your booking was successful, enjoy the show!!!"
+                : "Oh no, your booking failed :(";
+        Content content = new Content("text/plain", contents);
+        Mail mail = new Mail(from, subject, to, content);
+
+        SendGrid sg = new SendGrid(sendGridAPIKey);
+        Request request = new Request();
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            System.out.println(response.getStatusCode());
+            System.out.println(response.getBody());
+            System.out.println(response.getHeaders());
+        } catch (IOException ex) {
+            System.out.println("sending mail failed");
+        }
     }
 
 //    // Remove made bookings due to a duplicate booking being present in the list

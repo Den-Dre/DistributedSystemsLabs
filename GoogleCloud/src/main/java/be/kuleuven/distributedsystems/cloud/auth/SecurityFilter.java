@@ -3,13 +3,10 @@ package be.kuleuven.distributedsystems.cloud.auth;
 import be.kuleuven.distributedsystems.cloud.entities.User;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.google.api.gax.rpc.UnauthenticatedException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,64 +44,45 @@ public class SecurityFilter extends OncePerRequestFilter {
         User user;
         if (session != null) {
             try {
-                JsonObject googleKeys = getKeys();
-
+                // 1. Decode the JWT
                 DecodedJWT idToken = JWT.decode(session.getValue());
-                // System.out.println("JWT: " + jwt.getHeader());
+
+                // 2. Get the Key Id from the decoded jwt
                 var kid = idToken.getKeyId();
 
-                // System.out.println("kid: " + kid);
-
+                // 3. Fetch the google public keys
+                JsonObject googleKeys = getGoogleKeys();
                 var pubkey = googleKeys.get(kid).getAsString();
                 // Trying to do the parsing as done here:
                 // https://stackoverflow.com/questions/9739121/convert-a-pem-formatted-string-to-a-java-security-cert-x509certificate
+                RSAPublicKey publicKey = null;
+                X509Certificate cert = convertStringToX509Cert(pubkey);
+                publicKey = (RSAPublicKey) cert.getPublicKey();
 
-                java.security.interfaces.RSAPublicKey publicKey = null;
-                try {
-                    X509Certificate cert = convertStringToX509Cert(pubkey);
+                // 4. Verify the decoded jwt
+                Algorithm algorithm = Algorithm.RSA256(publicKey, null);
+                DecodedJWT jwt = JWT.require(algorithm)
+                                    .withIssuer("https://securetoken.google.com/" + "distributedsystemspart2")
+                                    .build()
+                                    .verify(idToken); // This verifies all the claims as mentioned on:
+                // https://firebase.google.com/docs/auth/admin/verify-id-tokens#verify_id_tokens_using_a_third-party_jwt_library
 
-                    publicKey = (java.security.interfaces.RSAPublicKey) cert.getPublicKey();
-                    // System.out.println("Public key: " + publicKey);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                DecodedJWT jwt = null;
-                try {
-                    Algorithm algorithm = Algorithm.RSA256(publicKey, null);
-                    jwt = JWT.require(algorithm)
-                            .withIssuer("https://securetoken.google.com/" + "distributedsystemspart2")
-                            .build()
-                            .verify(idToken); // This verifies all the claims as mentioned on:
-                    // https://firebase.google.com/docs/auth/admin/verify-id-tokens#verify_id_tokens_using_a_third-party_jwt_library
-                } catch (JWTVerificationException e) {
-                    // Unauthorized
-                    return;
-                }
-
-                // System.out.println("public key: " + pubkey);
-                // System.out.println("signature: " + signature);
-
+                // 5. Use the claims from the verified jwt
                 String role = jwt.getClaim("role").asString();
                 if (!"manager".equals(role))
-                        role = "";
+                    role = "";
 
                 String mail = jwt.getClaim("email").asString();
                 user = new User(mail, role);
-
-            } catch (JWTDecodeException e) {
-//                System.out.println(e);
-//                System.out.println("decode-exception");
-                user = new User("", "");
+                SecurityContext context = SecurityContextHolder.getContext();
+                context.setAuthentication(new FirebaseAuthentication(user));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
 
             // TODO: (level 1) decode Identity Token and assign correct email and role (Done? YYAAS)
             // TODO: (level 2) verify Identity Token
-
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(new FirebaseAuthentication(user));
         }
         filterChain.doFilter(request, response);
     }
@@ -115,7 +94,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 .generateCertificate(targetStream);
     }
 
-    private JsonObject getKeys() {
+    private JsonObject getGoogleKeys() {
         URL url;
         HttpURLConnection con = null;
         try {
