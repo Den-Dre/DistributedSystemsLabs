@@ -22,13 +22,11 @@ import com.google.gson.JsonParser;
 import com.google.pubsub.v1.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.HypermediaWebClientConfigurer;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -37,10 +35,8 @@ import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -230,27 +226,8 @@ public class Application {
     }
 
     private static String readLocalShows()  {
-        // Source: https://mkyong.com/spring/spring-resource-loader-with-getresource-example/
-//        System.out.println("looking for data.json");
-//        Resource resource = context.getResource("classpath:/data.json");
-//
-//        System.out.println("reading data.json");
-//        try {
-//            StringBuilder fileContents = new StringBuilder();
-//            InputStream in = resource.getInputStream();
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                fileContents.append(line);
-//            }
-//            reader.close();
-//            return fileContents.toString();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         try {
-            String data = new String(new ClassPathResource("data.json").getInputStream().readAllBytes());
-            return data;
+            return new String(new ClassPathResource("data.json").getInputStream().readAllBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -285,12 +262,10 @@ public class Application {
         }
 
         @Override
-        public void refresh() throws IOException {
+        public void refresh() {
 
         }
     }
-
-//    public FirestoreOptions.Builder setEmulatorHost(String emulatorHost) {}
 
     @Bean
     public static boolean isProduction() {
@@ -329,10 +304,12 @@ public class Application {
     @Bean
     public static Firestore db() {
         if (isProduction()) {
-            return FirestoreOptions.newBuilder()
-                    .setProjectId("distributedsystemspart2")
-                    .build()
-                    .getService();
+            try {
+                return FirestoreOptions.newBuilder()
+                        .setProjectId("distributedsystemspart2")
+                        .build()
+                        .getService();
+            } catch (Exception ignored) {}
         }
         // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
         return FirestoreOptions.newBuilder()

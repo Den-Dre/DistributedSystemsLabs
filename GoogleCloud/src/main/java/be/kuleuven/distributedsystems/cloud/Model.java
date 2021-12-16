@@ -135,8 +135,6 @@ public class Model {
     public List<Booking> getBookings(String customer) {
         List<Booking> bookings = new ArrayList<>();
         try {
-            // Take the delay of the Pub Sub into account
-            TimeUnit.MILLISECONDS.sleep(RETRY_DELAY/2);
             // Get all the bookings of the customer from firestore
             QuerySnapshot snapshot = db.collection("Bookings").whereEqualTo("customer", customer).get().get();
             for (DocumentSnapshot bookingSnap : snapshot.getDocuments()) {
