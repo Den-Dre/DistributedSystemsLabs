@@ -301,29 +301,42 @@ public class Application {
         return firewall;
     }
 
-    @Bean
-    public static Firestore db() {
-        if (isProduction()) {
-            return FirestoreOptions.newBuilder()
-                    .setProjectId("distributedsystemspart2")
-                    .build()
-                    .getService();
-        }
-        // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
-        return FirestoreOptions.newBuilder()
-                .setProjectId("demo-distributed-systems-kul")
-                .setChannelProvider(channelProvider)
-                .setCredentialsProvider(FixedCredentialsProvider.create(new FakeCreds()))
-                .build()
-                .getService();
-    }
+    private static Firestore prodDatabase = null;
 
     private static final InstantiatingGrpcChannelProvider channelProvider =
             InstantiatingGrpcChannelProvider
-            .newBuilder()
-            .setEndpoint("localhost:8084")
-            .setChannelConfigurator(ManagedChannelBuilder::usePlaintext)
-            .build();
+                    .newBuilder()
+                    .setEndpoint("localhost:8084")
+                    .setChannelConfigurator(ManagedChannelBuilder::usePlaintext)
+                    .build();
+
+    private static Firestore localDatabase = null;
+
+    @Bean
+    public static Firestore db() {
+        if (isProduction()) {
+            if (prodDatabase == null) {
+                prodDatabase = FirestoreOptions.newBuilder()
+                        .setProjectId("distributedsystemspart2")
+                        .build()
+                        .getService();
+            }
+            return prodDatabase;
+        } else {
+            if (localDatabase == null) {
+                localDatabase = FirestoreOptions.newBuilder()
+                        .setProjectId("demo-distributed-systems-kul")
+                        .setChannelProvider(channelProvider)
+                        .setCredentialsProvider(FixedCredentialsProvider.create(new FakeCreds()))
+                        .build()
+                        .getService();
+            }
+            return localDatabase;
+        }
+        // Source: https://gist.github.com/ryanpbrewster/aef2a5c411a074819c8d7b67be80621c
+    }
+
+
 
     @Bean
     HashMap<String, ICompany> companies() {

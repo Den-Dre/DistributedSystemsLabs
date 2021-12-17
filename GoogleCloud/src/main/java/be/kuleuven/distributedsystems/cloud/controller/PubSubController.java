@@ -89,20 +89,13 @@ public class PubSubController {
             if (!localQuotes.isEmpty())
                 successfulTickets.addAll(companies.get(localQuotes.get(0).getCompany()).confirmQuotes(localQuotes, customer, API_KEY, builder));
 
-
-//            for (Quote q : quotes) {
-//                 // PubsubMessage.builder and publish
-//                ICompany company = companies.get(q.getCompany());
-//                var ticket = company.confirmQuote(q, customer, API_KEY, builder);
-//                successfulTickets.add(ticket);
-//            }
-
-
+            // Make an update to the bestCustomers-list
             ArrayList<Ticket> tickets = quotes.stream().map(
                     quote -> new Ticket(quote.getCompany(), quote.getShowId(), quote.getSeatId(), UUID.randomUUID(), finalCustomer)
             ).collect(Collectors.toCollection(ArrayList::new));
             updateBestCustomers(customer, tickets.size());
 
+            // Add the booking to firestore
             addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, finalCustomer));
             sendMail(true, finalCustomer);
             System.out.println("Mail for successful booking sent to " + finalCustomer);
@@ -115,7 +108,6 @@ public class PubSubController {
             successfulTickets.forEach(t -> companies.get(t.getCompany()).undoBooking(t, finalAPI_KEY, builder));
             System.out.println("Sending mail: booking failed, sending to: " + customer);
             sendMail(false, customer);
-            // undoBookings(successfulTicketIDs, API_KEY);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -150,6 +142,7 @@ public class PubSubController {
     }
 
     private void sendMail(Boolean successFullBooking, String recipient) {
+        // TODO: don't send when in testing??
         Email from = new Email("r0760777@kuleuven.be");
         String subject = successFullBooking
                 ? "Booking confirmation mail"
@@ -168,31 +161,11 @@ public class PubSubController {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sg.api(request);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
-            System.out.println(response.getHeaders());
+            System.out.println("Mail status code: " + response.getStatusCode());
+//            System.out.println(response.getBody());
+//            System.out.println(response.getHeaders());
         } catch (IOException ex) {
             System.out.println("sending mail failed");
         }
     }
-
-//    // Remove made bookings due to a duplicate booking being present in the list
-//    private void undoBookings(ArrayList<Ticket> toDelete, String API_KEY) {
-//        for (Ticket t : toDelete) {
-//
-//            var ticket = builder
-//                    .baseUrl(String.format("https://%s/", t.getCompany()))
-//                    .build()
-//                    .delete()
-//                    .uri(builder -> builder
-//                            .pathSegment("shows/{showId}/seats/{seatId}/ticket/{ticketID}")
-//                            .queryParam("customer", t.getCustomer())
-//                            .queryParam("key", API_KEY.replaceAll("\"", ""))
-//                            .build(t.getShowId().toString(), t.getSeatId().toString(), t.getTicketId().toString()))
-//                    .retrieve()
-//                    .bodyToMono(new ParameterizedTypeReference<Ticket>() {
-//                    })
-//                    .block();
-//        }
-//    }
 }

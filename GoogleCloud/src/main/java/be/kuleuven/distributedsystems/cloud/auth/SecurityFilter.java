@@ -18,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.WebUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -38,43 +39,51 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
     private final WebClient.Builder builder = WebClient.builder();
 
+    @Resource(name = "isProduction")
+    private boolean isProduction;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var session = WebUtils.getCookie(request, "session");
         User user;
+        DecodedJWT authorizedJWT;
         if (session != null) {
             try {
                 // 1. Decode the JWT
                 DecodedJWT idToken = JWT.decode(session.getValue());
 
-                // 2. Get the Key Id from the decoded jwt
-                var kid = idToken.getKeyId();
+                // Try to verify the jwt if we are in production
+                if (isProduction) {
+                    // 2. Get the Key Id from the decoded jwt
+                    var kid = idToken.getKeyId();
 
-                // 3. Fetch the google public keys
-                JsonObject googleKeys = getGoogleKeys();
-                var pubkey = googleKeys.get(kid).getAsString();
-                // Trying to do the parsing as done here:
-                // https://stackoverflow.com/questions/9739121/convert-a-pem-formatted-string-to-a-java-security-cert-x509certificate
-                RSAPublicKey publicKey = null;
-                X509Certificate cert = convertStringToX509Cert(pubkey);
-                publicKey = (RSAPublicKey) cert.getPublicKey();
+                    // 3. Fetch the google public keys
+                    JsonObject googleKeys = getGoogleKeys();
+                    var pubkey = googleKeys.get(kid).getAsString();
+                    // Trying to do the parsing as done here:
+                    // https://stackoverflow.com/questions/9739121/convert-a-pem-formatted-string-to-a-java-security-cert-x509certificate
+                    X509Certificate cert = convertStringToX509Cert(pubkey);
+                    RSAPublicKey publicKey = (RSAPublicKey) cert.getPublicKey();
 
-                // 4. Verify the decoded jwt
-                Algorithm algorithm = Algorithm.RSA256(publicKey, null);
-                DecodedJWT jwt = JWT.require(algorithm)
-                                    .withIssuer("https://securetoken.google.com/" + "distributedsystemspart2")
-                                    .build()
-                                    .verify(idToken); // This verifies all the claims as mentioned on:
-                // https://firebase.google.com/docs/auth/admin/verify-id-tokens#verify_id_tokens_using_a_third-party_jwt_library
-
+                    // 4. Verify the decoded jwt
+                    Algorithm algorithm = Algorithm.RSA256(publicKey, null);
+                    authorizedJWT = JWT.require(algorithm)
+                            .withIssuer("https://securetoken.google.com/" + "distributedsystemspart2")
+                            .build()
+                            .verify(idToken); // This verifies all the claims as mentioned on:
+                    // https://firebase.google.com/docs/auth/admin/verify-id-tokens#verify_id_tokens_using_a_third-party_jwt_library
+                } else {
+                    authorizedJWT = idToken;
+                }
 
                 // 5. Use the claims from the verified jwt
-                String role = jwt.getClaim("role").asString();
+                String role = authorizedJWT.getClaim("role").asString();
                 if (!"manager".equals(role))
                     role = "";
 
-                String mail = jwt.getClaim("email").asString();
+                String mail = authorizedJWT.getClaim("email").asString();
                 user = new User(mail, role);
+
                 SecurityContext context = SecurityContextHolder.getContext();
                 context.setAuthentication(new FirebaseAuthentication(user));
             } catch (Exception e) {
