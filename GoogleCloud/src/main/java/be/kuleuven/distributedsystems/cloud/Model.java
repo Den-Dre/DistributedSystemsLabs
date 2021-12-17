@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 @Component
 public class Model {
 
-    private static final int RETRY_DELAY = 1000;
-
     private final static String API_KEY = "wCIoTqec6vGJijW2meeqSokanZuqOL";
     private final WebClient.Builder builder;
 
@@ -44,8 +42,6 @@ public class Model {
     private String applicationURL;
 
     private final HashMap<String, ICompany> companies;
-
-    // private final HashMap<String, Integer> bestCustomersList = new HashMap<>();
 
     @Autowired
     public Model(HashMap<String, ICompany> companies, WebClient.Builder builder) {

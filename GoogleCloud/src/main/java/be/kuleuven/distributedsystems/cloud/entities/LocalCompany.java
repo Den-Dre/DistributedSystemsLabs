@@ -148,22 +148,6 @@ public class LocalCompany implements ICompany {
     }
 
     public void undoBooking(Ticket t, String API_KEY, WebClient.Builder builder) {
-        // TODO: does this method need to be implemented?
-        // --> If someone else has booked the seat before you, you will not be able to book it anyways
-        // + we don't want to un-book the other persons booking
-//        DocumentReference seatRef = db.collection(Application.localShowCollectionName)
-//                .document(t.getShowId().toString())
-//                .collection(Application.seatsCollectionName)
-//                .document(t.getSeatId().toString());
-//
-//        try {
-//            DocumentSnapshot seatSnap = seatRef.get().get();
-//            Boolean alreadyBooked = seatSnap.getBoolean("booked");
-//            System.out.println("Duplicate booking in local was: " + alreadyBooked);
-//
-//            seatRef.update(unbookSeatMap).get();
-//        } catch (InterruptedException | ExecutionException e) {
-//            e.printStackTrace();
-//        }
+
     }
 }
