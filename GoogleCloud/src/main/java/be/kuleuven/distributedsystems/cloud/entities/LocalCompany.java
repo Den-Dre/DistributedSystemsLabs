@@ -113,16 +113,6 @@ public class LocalCompany implements ICompany {
                     .document(q.getSeatId().toString()));
         }
 
-        // DocumentSnapshot seatSnap = seatRef.get().get();
-        // Boolean alreadyBooked = seatSnap.getBoolean("booked");
-        // If the seat is booked throw an error
-//        if (Boolean.TRUE.equals(alreadyBooked))
-//            throw new Exception("Double booking in LocalCompany");
-
-        // Book the seat
-        // seatRef.update(bookSeatMap).get();
-        // TODO: is it correct to use UUID.randomUUID()?
-
         ApiFuture<Void> futureTransaction = db.runTransaction(transaction -> {
             // retrieve document and increment population field
             // 1. Loop over seatRefs to read all the seats

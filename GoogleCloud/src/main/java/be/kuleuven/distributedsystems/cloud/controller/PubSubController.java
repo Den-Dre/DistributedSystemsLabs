@@ -90,13 +90,10 @@ public class PubSubController {
                 successfulTickets.addAll(companies.get(localQuotes.get(0).getCompany()).confirmQuotes(localQuotes, customer, API_KEY, builder));
 
             // Make an update to the bestCustomers-list
-            ArrayList<Ticket> tickets = quotes.stream().map(
-                    quote -> new Ticket(quote.getCompany(), quote.getShowId(), quote.getSeatId(), UUID.randomUUID(), finalCustomer)
-            ).collect(Collectors.toCollection(ArrayList::new));
-            updateBestCustomers(customer, tickets.size());
+            updateBestCustomers(customer, successfulTickets.size());
 
             // Add the booking to firestore
-            addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), tickets, finalCustomer));
+            addBooking(new Booking(UUID.randomUUID(), LocalDateTime.now(), successfulTickets, finalCustomer));
             sendMail(true, finalCustomer);
             System.out.println("Mail for successful booking sent to " + finalCustomer);
 
@@ -106,8 +103,8 @@ public class PubSubController {
             String finalAPI_KEY = API_KEY;
             // delegate the deletion of tickets to their respective companies
             successfulTickets.forEach(t -> companies.get(t.getCompany()).undoBooking(t, finalAPI_KEY, builder));
-            System.out.println("Sending mail: booking failed, sending to: " + customer);
             sendMail(false, customer);
+            System.out.println("Mail for unsuccessful booking sent to " + customer);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }

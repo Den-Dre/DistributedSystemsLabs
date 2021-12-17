@@ -1,36 +1,90 @@
 This is the Google Pub/Sub fake.
 Implementation may be incomplete or differ from the real system.
-Dec 17, 2021 9:22:37 AM com.google.cloud.pubsub.testing.v1.Main main
+Dec 17, 2021 4:36:15 PM com.google.cloud.pubsub.testing.v1.Main main
 INFO: IAM integration is disabled. IAM policy methods and ACL checks are not supported
-Dec 17, 2021 9:22:38 AM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround
+Dec 17, 2021 4:36:15 PM io.gapi.emulators.netty.NettyUtil applyJava7LongHostnameWorkaround
 INFO: Applied Java 7 long hostname workaround.
-Dec 17, 2021 9:22:38 AM com.google.cloud.pubsub.testing.v1.Main main
+Dec 17, 2021 4:36:16 PM com.google.cloud.pubsub.testing.v1.Main main
 INFO: Server started, listening on 8083
-Dec 17, 2021 9:22:38 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 17, 2021 4:36:16 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 17, 2021 9:26:20 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 17, 2021 4:37:23 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 17, 2021 9:26:20 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 17, 2021 4:37:23 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 17, 2021 9:32:27 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 17, 2021 4:37:50 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 17, 2021 9:32:27 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 17, 2021 4:37:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 17, 2021 9:36:24 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 17, 2021 4:38:44 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 17, 2021 9:36:24 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 17, 2021 4:38:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 17, 2021 9:36:56 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 17, 2021 4:40:17 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 17, 2021 9:36:56 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 17, 2021 4:40:17 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 17, 2021 9:39:39 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 17, 2021 4:40:18 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 17, 2021 9:39:39 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 17, 2021 4:40:18 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-Dec 17, 2021 9:41:05 AM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+Dec 17, 2021 4:40:18 PM io.grpc.netty.NettyServerTransport notifyTerminated
+INFO: Transport failed
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398)
+	at io.netty.buffer.PooledUnsafeDirectByteBuf.setBytes(PooledUnsafeDirectByteBuf.java:288)
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1125)
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:347)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:148)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:677)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:612)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:529)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:491)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:905)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:630)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+
+Dec 17, 2021 4:42:35 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
 INFO: Adding handler(s) to newly registered Channel.
-Dec 17, 2021 9:41:05 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+Dec 17, 2021 4:42:35 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
-*** shutting down gRPC server since JVM is shutting down
-*** server shut down
+Dec 17, 2021 4:42:37 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+INFO: Adding handler(s) to newly registered Channel.
+Dec 17, 2021 4:42:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Dec 17, 2021 4:42:37 PM io.grpc.netty.NettyServerTransport notifyTerminated
+INFO: Transport failed
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398)
+	at io.netty.buffer.PooledUnsafeDirectByteBuf.setBytes(PooledUnsafeDirectByteBuf.java:288)
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1125)
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:347)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:148)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:677)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:612)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:529)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:491)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:905)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:630)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+
+Dec 17, 2021 4:46:27 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+INFO: Adding handler(s) to newly registered Channel.
+Dec 17, 2021 4:46:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Dec 17, 2021 4:46:28 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+INFO: Adding handler(s) to newly registered Channel.
+Dec 17, 2021 4:46:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Dec 17, 2021 4:49:06 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+INFO: Adding handler(s) to newly registered Channel.
+Dec 17, 2021 4:49:06 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+Dec 17, 2021 4:49:07 PM io.gapi.emulators.grpc.GrpcServer$3 operationComplete
+INFO: Adding handler(s) to newly registered Channel.
+Dec 17, 2021 4:49:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.

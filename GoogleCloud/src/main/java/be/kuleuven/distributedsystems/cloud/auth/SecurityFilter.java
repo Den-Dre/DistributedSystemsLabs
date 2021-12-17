@@ -89,9 +89,6 @@ public class SecurityFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            // TODO: (level 1) decode Identity Token and assign correct email and role (Done? YYAAS)
-            // TODO: (level 2) verify Identity Token
         }
         filterChain.doFilter(request, response);
     }
@@ -118,21 +115,10 @@ public class SecurityFilter extends OncePerRequestFilter {
             while ((inputLine = in.readLine()) != null) {
                 content.append(inputLine);
             }
-//            // replace with builder
-//            builder
-//                    .baseUrl("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
-//                    .build()
-//                    .get()
-//                    .retrieve()
-//                    //.bodyToMono(new ParameterizedTypeReference<Ticket>() {})
-//                    .
-//                    .block();
 
             JsonParser parser = new JsonParser();
             JsonObject obj  = parser.parse(content.toString()).getAsJsonObject();
 
-//            System.out.println("GET request contents: " + content);
-//            System.out.println("GET request status: " +  status);
             in.close();
             return obj;
         } catch (IOException e) {
